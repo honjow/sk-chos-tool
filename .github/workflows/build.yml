@@ -1,0 +1,74 @@
+name: Build & Release
+
+# Trigger on push to master branch or with a tag
+on:
+  push:
+    branches:
+      - '**'
+    tags:
+      - v*
+
+# If previous workflow is still running, we push again, we will cancel the previous workflow
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-channel: 'stable'
+
+      - name: Flutter Pub Get
+        run: |
+          git config --global core.longpaths true
+          flutter pub get
+
+      - name: Get app version
+        id: get_version
+        shell: bash
+        run: |
+          echo "::set-output name=version::$(head -n 5 pubspec.yaml | tail -n 1 | cut -d ' ' -f 2)"
+      
+      - name: Build Linux
+        run: bash appimage.sh
+
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: sk-chos-tool
+          path: Sk_ChimeraOS_Tool-latest-x86_64.AppImage
+  Publish:
+    if: startsWith(github.ref, 'refs/tags/')
+    name: Publish
+    needs: Build
+    runs-on: ubuntu-latest
+    steps:
+      - run: mkdir /tmp/artifacts
+      - name: Download production artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: sk-chos-tool
+          path: /tmp/artifacts
+
+      - run: ls -R /tmp/artifacts
+
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: /tmp/artifacts/sk-chos-tool/Sk_ChimeraOS_Tool-latest-x86_64.AppImage
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: contains(github.ref, 'pre')
+          # body: |
+          #   **Changelog:**
+          #   $(git log --pretty=format:"%h %s" ${{ github.event.before }}..${{ github.sha }})
