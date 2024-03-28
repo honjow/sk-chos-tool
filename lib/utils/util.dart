@@ -4,6 +4,9 @@ import 'dart:io';
 import 'package:ini_file/ini_file.dart';
 import 'package:process_run/process_run.dart';
 
+// ignore: constant_identifier_names
+const SK_TOOL_SCRIPTS_PATH = '/usr/share/sk-chos-tool/scripts';
+
 Future<bool> checkServiceAutostart(String serviceName) async {
   final results = await run(
     'sudo systemctl is-enabled $serviceName',
@@ -170,4 +173,111 @@ Future<void> installNix() async {
 
 Future<void> uninstallNix() async {
   await run('/usr/bin/sk-nix-install uninstall');
+}
+
+Future<bool> chkFileExists(String path) async {
+  final file = File(path);
+  return await file.exists();
+}
+
+Future<String> getGithubReleaseCdn() async {
+  const confPath = '/etc/sk-chos-tool/github_cdn.conf';
+  final ini = IniFile();
+  await ini.readFile(confPath);
+  final cdns = ini.getItem('release', 'server') ?? '';
+  final cdnList = cdns.split(':::');
+  // random select one
+  cdnList.shuffle();
+  return cdnList.first;
+}
+
+Future<String> getGithubRawCdn() async {
+  const confPath = '/etc/sk-chos-tool/github_cdn.conf';
+  final ini = IniFile();
+  await ini.readFile(confPath);
+  final cdns = ini.getItem('raw', 'server') ?? '';
+  final cdnList = cdns.split(':::');
+  // random select one
+  cdnList.shuffle();
+  return cdnList.first;
+}
+
+Future<void> installEmuDeck() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/emudeck_install.sh $releasePrefix $rawPrefix';
+  await run(command);
+}
+
+// anime_games_launcher_install
+Future<void> installAnimeGamesLauncher() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/anime-games-launcher_install.sh $releasePrefix $rawPrefix';
+  await run(command);
+}
+
+// an_anime_game_launcher_install
+Future<void> installAnAnimeGameLauncher() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/an-anime-game-launcher_install.sh $releasePrefix $rawPrefix';
+  await run(command);
+}
+
+// the_honkers_railway_launcher_install
+Future<void> installTheHonkersRailwayLauncher() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/the-honkers-railway-launcher_install.sh $releasePrefix $rawPrefix';
+  await run(command);
+}
+
+// honkers_launcher_install
+Future<void> installHonkersLauncher() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/honkers-launcher_install.sh $releasePrefix $rawPrefix';
+  await run(command);
+}
+
+// make_swapfile
+Future<void> makeSwapfile() async {
+  await run('sudo $SK_TOOL_SCRIPTS_PATH/make_swapfile.sh');
+}
+
+// clear_cache
+Future<void> clearCache() async {
+  await run(
+      'sudo rm -f /var/lib/pacman/db.lck ; rm -rf ~/.cache/sk-holoiso-config/* ; rm -rf ~/.local/share/pnpm/store/* ; yay -Scc --noconfirm');
+}
+
+// boot_repair
+Future<void> bootRepair() async {
+  await run('sudo /usr/bin/sk-chos-boot-fix');
+}
+
+// etc_repair
+Future<void> etcRepair() async {
+  await run('sudo $SK_TOOL_SCRIPTS_PATH/etc_repair.sh');
+}
+
+// etc_repair_full
+Future<void> etcRepairFull() async {
+  await run('sudo $SK_TOOL_SCRIPTS_PATH/etc_repair.sh full');
+}
+
+// re_first_run
+Future<void> reFirstRun() async {
+  await run('/usr/bin/sk-first-run');
+}
+
+// reset_gnome
+Future<void> resetGnome() async {
+  await run('sudo dconf update && dconf reset -f /');
 }

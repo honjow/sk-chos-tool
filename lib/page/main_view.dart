@@ -4,6 +4,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:sk_chos_tool/components/scroll.dart';
 import 'package:sk_chos_tool/controller/main_controller.dart';
+import 'package:sk_chos_tool/page/about_view.dart';
+import 'package:sk_chos_tool/page/advance_view.dart';
+import 'package:sk_chos_tool/page/app_view.dart';
 import 'package:sk_chos_tool/page/decky_view.dart';
 import 'package:sk_chos_tool/page/ota_view.dart';
 import 'package:sk_chos_tool/page/switch_view.dart';
@@ -117,14 +120,14 @@ class MainPage extends StatelessWidget {
                   child: PageView(
                     controller: controller.pageController,
                     physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      const SwitchView(),
-                      const ToolView(),
-                      const DeckyView(),
-                      Container(),
-                      Container(),
-                      const OtaView(),
-                      Container(),
+                    children: const [
+                      SwitchView(),
+                      ToolView(),
+                      DeckyView(),
+                      AppView(),
+                      AdvanceView(),
+                      OtaView(),
+                      AboutView(),
                     ],
                   ),
                 ),

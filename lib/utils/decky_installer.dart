@@ -1,10 +1,7 @@
 import 'dart:io';
 
-import 'package:ini_file/ini_file.dart';
 import 'package:process_run/process_run.dart';
-
-// ignore: constant_identifier_names
-const SK_TOOL_SCRIPTS_PATH = '/usr/share/sk-chos-tool/scripts';
+import 'package:sk_chos_tool/utils/util.dart';
 
 Future<bool> checkDeckyPluginExists(String pluginName) async {
   final pluginPath =
@@ -14,24 +11,22 @@ Future<bool> checkDeckyPluginExists(String pluginName) async {
 }
 
 Future<void> uninstallDeckyPlugin(String pluginName) async {
-  final pluginPath =
-      '${Platform.environment['HOME']}/homebrew/plugins/$pluginName';
+  final pluginDirPath = '${Platform.environment['HOME']}/homebrew/plugins';
+  final pluginPath = '$pluginDirPath/$pluginName';
+  final command = 'chmod -R +rw $pluginDirPath';
+  await run(command);
+
   // delete the plugin directory
   final pluginDir = Directory(pluginPath);
   if (pluginDir.existsSync()) {
     await pluginDir.delete(recursive: true);
+    await restartDeckyLoader();
   }
 }
 
-Future<String> getGithubReleaseCdn() async {
-  const confPath = '/etc/sk-chos-tool/github_cdn.conf';
-  final ini = IniFile();
-  await ini.readFile(confPath);
-  final cdns = ini.getItem('release', 'server') ?? '';
-  final cdnList = cdns.split(':::');
-  // random select one
-  cdnList.shuffle();
-  return cdnList.first;
+Future<void> restartDeckyLoader() async {
+  const command = 'sudo systemctl restart plugin_loader.service';
+  await run(command);
 }
 
 Future<void> installPowerControl() async {

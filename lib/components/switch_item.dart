@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 class SwitchItem extends StatefulWidget {
@@ -14,7 +16,7 @@ class SwitchItem extends StatefulWidget {
   final String? description;
   final bool? value;
   final ValueChanged<bool>? onChanged;
-  final Future<bool> Function()? onCheck;
+  final FutureOr<bool> Function()? onCheck;
   final bool enabled;
 
   @override

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 const kFontFamilyFallback = [
-  'Microsoft YaHei',
-  'SimHei',
-  'SimSun',
+  // 'Microsoft YaHei',
+  // 'SimHei',
+  // 'SimSun',
+  '',
 ];
 
 final ButtonStyle buttonStyle = ButtonStyle(

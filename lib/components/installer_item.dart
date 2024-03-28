@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
@@ -15,11 +17,11 @@ class InstallerItem extends StatefulWidget {
   });
   final String title;
   final String? description;
-  final Future<void> Function()? onInstall;
-  final Future<void> Function()? onUninstall;
-  final Future<bool> Function()? onCheck;
-  final Future<String>? Function()? onCurrentVersionCheck;
-  final Future<String>? Function()? onLatestVersionCheck;
+  final FutureOr<void> Function()? onInstall;
+  final FutureOr<void> Function()? onUninstall;
+  final FutureOr<bool> Function()? onCheck;
+  final FutureOr<String>? Function()? onCurrentVersionCheck;
+  final FutureOr<String>? Function()? onLatestVersionCheck;
 
   @override
   State<InstallerItem> createState() => _InstallerItemState();
@@ -27,6 +29,7 @@ class InstallerItem extends StatefulWidget {
 
 class _InstallerItemState extends State<InstallerItem> {
   bool _installed = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -82,15 +85,37 @@ class _InstallerItemState extends State<InstallerItem> {
               ],
             ),
           ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(),
+              ),
+            ),
           if (widget.onUninstall != null && _installed)
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 style: buttonStyle,
-                onPressed: () async {
-                  await widget.onUninstall?.call();
-                  await _checkValue();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        try {
+                          await widget.onUninstall?.call();
+                          await _checkValue();
+                        } catch (e) {
+                          rethrow;
+                        } finally {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
                 child: const Text('卸载'),
               ),
             ),
@@ -99,10 +124,23 @@ class _InstallerItemState extends State<InstallerItem> {
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
                 style: buttonStyle,
-                onPressed: () async {
-                  await widget.onInstall?.call();
-                  await _checkValue();
-                },
+                onPressed: _isLoading
+                    ? null
+                    : () async {
+                        setState(() {
+                          _isLoading = true;
+                        });
+                        try {
+                          await widget.onInstall?.call();
+                          await _checkValue();
+                        } catch (e) {
+                          rethrow;
+                        } finally {
+                          setState(() {
+                            _isLoading = false;
+                          });
+                        }
+                      },
                 child: _installed ? const Text('重新安装') : const Text('安装'),
               ),
             ),
