@@ -11,24 +11,38 @@ class SwitchView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    SwitchItemController hhdController = SwitchItemController();
+    SwitchItemController handyconController = SwitchItemController();
+
     return SkSingleChildScrollView(
       child: Column(
         children: [
           SwitchItem(
             title: 'HandyGCCS',
+            controller: handyconController,
             description: '用来驱动部分掌机的手柄按钮',
             onChanged: (bool value) async {
-              await toggleService('handygccs.service', value);
+              await toggleService('handycon.service', value);
+              if (value) {
+                await toggleService(
+                    'hhd@${Platform.environment['USER']}.service', false);
+                hhdController.reCheck?.call();
+              }
             },
             onCheck: () async => checkServiceAutostart('handycon.service'),
           ),
           SwitchItem(
             title: 'HHD',
+            controller: hhdController,
             description:
                 'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
             onChanged: (bool value) async {
               await toggleService(
                   'hhd@${Platform.environment['USER']}.service', value);
+              if (value) {
+                await toggleService('handycon.service', false);
+                handyconController.reCheck?.call();
+              }
             },
             onCheck: () async => checkServiceAutostart(
                 'hhd@${Platform.environment['USER']}.service'),

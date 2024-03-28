@@ -2,6 +2,12 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+class SwitchItemController {
+  SwitchItemController();
+
+  Future<void> Function()? reCheck;
+}
+
 class SwitchItem extends StatefulWidget {
   const SwitchItem({
     super.key,
@@ -11,6 +17,7 @@ class SwitchItem extends StatefulWidget {
     this.value,
     this.onCheck,
     this.enabled = true,
+    this.controller,
   }) : assert(value != null || onCheck != null);
   final String title;
   final String? description;
@@ -18,6 +25,7 @@ class SwitchItem extends StatefulWidget {
   final ValueChanged<bool>? onChanged;
   final FutureOr<bool> Function()? onCheck;
   final bool enabled;
+  final SwitchItemController? controller;
 
   @override
   State<SwitchItem> createState() => _SwitchItemState();
@@ -29,13 +37,17 @@ class _SwitchItemState extends State<SwitchItem> {
   @override
   void initState() {
     super.initState();
+    if (widget.controller != null) {
+      widget.controller!.reCheck = checkValue;
+    }
+
     //addPostFrameCallback
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkValue();
+      checkValue();
     });
   }
 
-  Future<void> _checkValue() async {
+  Future<void> checkValue() async {
     if (widget.onCheck != null) {
       final value = await widget.onCheck!();
       setState(() {
