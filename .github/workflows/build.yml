@@ -54,7 +54,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: sk-chos-tool
-          path: Sk_ChimeraOS_Tool-latest-x86_64.AppImage
+          path: sk_chos_tool-latest-x86_64.AppImage
   Publish:
     if: startsWith(github.ref, 'refs/tags/')
     name: Publish
@@ -76,7 +76,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: /tmp/artifacts/Sk_ChimeraOS_Tool-latest-x86_64.AppImage
+          files: /tmp/artifacts/sk_chos_tool-latest-x86_64.AppImage
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           prerelease: contains(github.ref, 'pre')
