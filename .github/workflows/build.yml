@@ -1,5 +1,8 @@
 name: Build & Release
 
+permissions:
+  contents: write
+
 # Trigger on push to master branch or with a tag
 on:
   push:
@@ -73,7 +76,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: /tmp/artifacts/sk-chos-tool/Sk_ChimeraOS_Tool-latest-x86_64.AppImage
+          files: /tmp/artifacts/Sk_ChimeraOS_Tool-latest-x86_64.AppImage
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
           prerelease: contains(github.ref, 'pre')
