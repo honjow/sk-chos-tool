@@ -79,7 +79,7 @@ jobs:
           files: /tmp/artifacts/sk_chos_tool-latest-x86_64.AppImage
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true
-          prerelease: contains(github.ref, 'pre')
+          prerelease: contains(github.ref_name, 'pre')
           # body: |
           #   **Changelog:**
           #   $(git log --pretty=format:"%h %s" ${{ github.event.before }}..${{ github.sha }})
