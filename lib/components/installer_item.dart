@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
 
@@ -105,10 +106,45 @@ class _InstallerItemState extends State<InstallerItem> {
                         setState(() {
                           _isLoading = true;
                         });
+                        final backgroundColor = context
+                            .theme.colorScheme.primaryContainer
+                            .withOpacity(0.9);
                         try {
                           await widget.onUninstall?.call();
                           await _checkValue();
+                          Get.snackbar(
+                            '卸载成功',
+                            '${widget.title} 卸载成功',
+                            backgroundColor: backgroundColor,
+                            icon: const Icon(Icons.check, color: Colors.green),
+                            barBlur: 100,
+                            snackPosition: SnackPosition.BOTTOM,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                          );
                         } catch (e) {
+                          Get.snackbar(
+                            '卸载失败',
+                            '${widget.title} 卸载失败 $e',
+                            backgroundColor: backgroundColor,
+                            icon: const Icon(Icons.error, color: Colors.red),
+                            barBlur: 100,
+                            snackPosition: SnackPosition.BOTTOM,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                          );
                           rethrow;
                         } finally {
                           setState(() {
@@ -130,10 +166,45 @@ class _InstallerItemState extends State<InstallerItem> {
                         setState(() {
                           _isLoading = true;
                         });
+                        final backgroundColor = context
+                            .theme.colorScheme.primaryContainer
+                            .withOpacity(0.9);
                         try {
                           await widget.onInstall?.call();
                           await _checkValue();
+                          Get.snackbar(
+                            '安装成功',
+                            '${widget.title} 安装成功',
+                            backgroundColor: backgroundColor,
+                            icon: const Icon(Icons.check, color: Colors.green),
+                            barBlur: 100,
+                            snackPosition: SnackPosition.BOTTOM,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                          );
                         } catch (e) {
+                          Get.snackbar(
+                            '安装失败',
+                            '${widget.title} 安装失败 $e',
+                            backgroundColor: backgroundColor,
+                            icon: const Icon(Icons.error, color: Colors.red),
+                            barBlur: 100,
+                            snackPosition: SnackPosition.BOTTOM,
+                            padding: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                            margin: const EdgeInsets.symmetric(
+                              vertical: 10,
+                              horizontal: 20,
+                            ),
+                          );
                           rethrow;
                         } finally {
                           setState(() {
