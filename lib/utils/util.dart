@@ -253,8 +253,11 @@ Future<void> makeSwapfile() async {
 
 // clear_cache
 Future<void> clearCache() async {
-  await run(
-      'sudo rm -f /var/lib/pacman/db.lck ; rm -rf ~/.cache/sk-holoiso-config/* ; rm -rf ~/.local/share/pnpm/store/* ; yay -Scc --noconfirm');
+  await run('''sudo rm -f /var/lib/pacman/db.lck
+      rm -rf ~/.cache/sk-holoiso-config/*
+      rm -rf ~/.local/share/pnpm/store/*
+      yay -Scc --noconfirm
+      ''');
 }
 
 // boot_repair
@@ -279,5 +282,5 @@ Future<void> reFirstRun() async {
 
 // reset_gnome
 Future<void> resetGnome() async {
-  await run('sudo dconf update && dconf reset -f /');
+  await run('bash -c "sudo dconf update && dconf reset -f /"');
 }
