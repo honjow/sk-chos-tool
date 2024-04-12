@@ -50,17 +50,18 @@ Future<void> installHueSync() async {
 
 Future<void> installToMoon() async {
   const command =
-      "curl -L http://i.ohmydeck.net | sed 's#/home/deck#/home/gamer#' | sed 's#curl#curl -k#g' | sh";
-  await run(command);
+      "bash -c \"curl -L http://i.ohmydeck.net | sed 's#/home/deck#/home/gamer#' | sed 's#curl#curl -k#g' | sh\"";
+  await run(command, runInShell: true);
 }
 
 Future<void> installSPB() async {
   await run(
-      'curl -sL https://github.com/honjow/SBP-PS5-to-Handheld/raw/master/install.sh | sh');
+      'bash -c "curl -sL https://github.com/honjow/SBP-PS5-to-Handheld/raw/master/install.sh | sh"',
+      runInShell: true);
 }
 
 Future<void> installSPBLegionGo() async {
   const command =
-      'curl -L https://github.com/honjow/sk-holoiso-config/raw/master/scripts/install-SBP-Legion-Go-Theme.sh | sh';
-  await run(command);
+      'bash -c "curl -L https://github.com/honjow/sk-holoiso-config/raw/master/scripts/install-SBP-Legion-Go-Theme.sh | sh"';
+  await run(command, runInShell: true, verbose: true);
 }
