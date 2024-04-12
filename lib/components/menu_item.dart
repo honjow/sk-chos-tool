@@ -32,14 +32,14 @@ class _MenuItemState extends State<MenuItem> {
   @override
   Widget build(BuildContext context) {
     if (widget.selected) {
-      _color = context.theme.colorScheme.onSecondary;
+      _color = context.theme.colorScheme.primaryContainer;
     }
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       onHover: (PointerHoverEvent e) {
         if (!widget.selected) {
           setState(() {
-            _color = context.theme.colorScheme.onSecondary;
+            _color = context.theme.colorScheme.primaryContainer;
           });
         }
       },
