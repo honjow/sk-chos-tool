@@ -15,6 +15,12 @@ class AppView extends StatelessWidget {
       child: Column(
         children: [
           InstallerItem(
+            title: '本程序',
+            description: 'Sk ChimeraOS Tool',
+            onCheck: () => true,
+            onInstall: installSkChosTool,
+          ),
+          InstallerItem(
             title: 'EmuDeck',
             description: '模拟器整合平台',
             onCheck: () async =>
@@ -48,12 +54,6 @@ class AppView extends StatelessWidget {
             onCheck: () async => await chkFileExists(
                 '$homePath/Applications/anime-games-launcher.AppImage'),
             onInstall: installAnimeGamesLauncher,
-          ),
-          InstallerItem(
-            title: '本程序',
-            description: 'Sk ChimeraOS Tool',
-            onCheck: () => true,
-            onInstall: () {},
           ),
         ],
       ),

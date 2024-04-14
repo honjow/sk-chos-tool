@@ -284,3 +284,8 @@ Future<void> reFirstRun() async {
 Future<void> resetGnome() async {
   await run('bash -c "sudo dconf update && dconf reset -f /"');
 }
+
+// install_sk_chos_tool
+Future<void> installSkChosTool() async {
+  await run('/usr/bin/__sk-chos-tool-update');
+}
