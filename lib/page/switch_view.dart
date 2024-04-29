@@ -74,6 +74,13 @@ class SwitchView extends StatelessWidget {
             onChanged: setUsbWakeup,
             onCheck: chkUsbWakeup,
           ),
+          const SwitchItem(
+            title: 'Github 下载加速',
+            description:
+                '开启后会随机使用内置的加速源下载 Github 文件，但某些时候可能会导致下载缓慢或者下载失败。在网络条件较好时建议关闭',
+            onChanged: setEnableGithubCdn,
+            onCheck: chkEnableGithubCdn,
+          ),
         ],
       ),
     );

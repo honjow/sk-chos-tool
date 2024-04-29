@@ -161,9 +161,46 @@ Future<void> setAutoupdateConfig(String key, String value) async {
   ini.writeFile();
 }
 
+Future<String> getUserConfig(String section, String key) async {
+  final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
+
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    await dir.create(recursive: true);
+  }
+  final file = File('$path/sk-chos-tool.conf');
+  if (!file.existsSync()) {
+    return '';
+  }
+  final ini = IniFile();
+  await ini.readFile(file.path);
+  return ini.getItem(section, key) ?? '';
+}
+
+Future<void> setUserConfig(String section, String key, String value) async {
+  final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
+
+  final dir = Directory(path);
+  if (!dir.existsSync()) {
+    await dir.create(recursive: true);
+  }
+  final file = File('$path/sk-chos-tool.conf');
+  if (!file.existsSync()) {
+    await file.create();
+  }
+  final ini = IniFile();
+  await ini.readFile(file.path);
+  ini.setItem(section, key, value);
+  ini.writeFile();
+}
+
 Future<bool> chkNix() async {
-  final results =
-      await run('nix --version', verbose: true, throwOnError: false);
+  final results = await run(
+    'source /etc/profile.d/nix.sh && nix-env --version',
+    verbose: true,
+    throwOnError: false,
+    runInShell: true,
+  );
   return results.isNotEmpty && results.first.exitCode == 0;
 }
 
@@ -203,47 +240,53 @@ Future<String> getGithubRawCdn() async {
 }
 
 Future<void> installEmuDeck() async {
-  final releasePrefix = await getGithubReleaseCdn();
-  final rawPrefix = await getGithubRawCdn();
-  final command =
-      'bash $SK_TOOL_SCRIPTS_PATH/emudeck_install.sh $releasePrefix $rawPrefix';
+  final param = await getCdnParam();
+  final command = 'bash $SK_TOOL_SCRIPTS_PATH/emudeck_install.sh $param';
   await run(command);
 }
 
 // anime_games_launcher_install
 Future<void> installAnimeGamesLauncher() async {
-  final releasePrefix = await getGithubReleaseCdn();
-  final rawPrefix = await getGithubRawCdn();
+  final param = await getCdnParam();
   final command =
-      'bash $SK_TOOL_SCRIPTS_PATH/anime-games-launcher_install.sh $releasePrefix $rawPrefix';
+      'bash $SK_TOOL_SCRIPTS_PATH/anime-games-launcher_install.sh $param';
   await run(command);
 }
 
 // an_anime_game_launcher_install
 Future<void> installAnAnimeGameLauncher() async {
-  final releasePrefix = await getGithubReleaseCdn();
-  final rawPrefix = await getGithubRawCdn();
+  final param = await getCdnParam();
   final command =
-      'bash $SK_TOOL_SCRIPTS_PATH/an-anime-game-launcher_install.sh $releasePrefix $rawPrefix';
+      'bash $SK_TOOL_SCRIPTS_PATH/an-anime-game-launcher_install.sh $param';
   await run(command);
 }
 
 // the_honkers_railway_launcher_install
 Future<void> installTheHonkersRailwayLauncher() async {
-  final releasePrefix = await getGithubReleaseCdn();
-  final rawPrefix = await getGithubRawCdn();
+  final param = await getCdnParam();
   final command =
-      'bash $SK_TOOL_SCRIPTS_PATH/the-honkers-railway-launcher_install.sh $releasePrefix $rawPrefix';
+      'bash $SK_TOOL_SCRIPTS_PATH/the-honkers-railway-launcher_install.sh $param';
   await run(command);
 }
 
 // honkers_launcher_install
 Future<void> installHonkersLauncher() async {
+  final param = await getCdnParam();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/honkers-launcher_install.sh $param';
+  await run(command);
+}
+
+Future<(String, String)> getCdn() async {
   final releasePrefix = await getGithubReleaseCdn();
   final rawPrefix = await getGithubRawCdn();
-  final command =
-      'bash $SK_TOOL_SCRIPTS_PATH/honkers-launcher_install.sh $releasePrefix $rawPrefix';
-  await run(command);
+  return (releasePrefix, rawPrefix);
+}
+
+Future<String> getCdnParam() async {
+  final releasePrefix = await getGithubReleaseCdn();
+  final rawPrefix = await getGithubRawCdn();
+  return await chkEnableGithubCdn() ? '$releasePrefix $rawPrefix' : '';
 }
 
 // make_swapfile
@@ -288,4 +331,17 @@ Future<void> resetGnome() async {
 // install_sk_chos_tool
 Future<void> installSkChosTool() async {
   await run('/usr/bin/__sk-chos-tool-update');
+}
+
+// set enable_github_cdn
+Future<void> setEnableGithubCdn(bool enable) async {
+  await setUserConfig(
+      'download', 'enable_github_cdn', enable ? 'true' : 'false');
+}
+
+// chk enable_github_cdn
+Future<bool> chkEnableGithubCdn() async {
+  final val = await getUserConfig('download', 'enable_github_cdn');
+  // 默认 true
+  return val != 'false';
 }

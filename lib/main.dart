@@ -12,7 +12,7 @@ void main() async {
     // const initialSize = Size(1024, 576);
     // appWindow.minSize = const Size(800, 400);
     // appWindow.size = initialSize;
-    appWindow.alignment = Alignment.center;
+    // appWindow.alignment = Alignment.center;
     appWindow.show();
   });
 }
