@@ -345,3 +345,7 @@ Future<bool> chkEnableGithubCdn() async {
   // 默认 true
   return val != 'false';
 }
+
+Future<void> uninstallAppImage(String appName) async {
+  await run('bash $SK_TOOL_SCRIPTS_PATH/appimage_uninstall.sh $appName');
+}

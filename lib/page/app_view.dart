@@ -26,6 +26,7 @@ class AppView extends StatelessWidget {
             onCheck: () async =>
                 await chkFileExists('$homePath/Applications/EmuDeck.AppImage'),
             onInstall: installEmuDeck,
+            onUninstall: () async => await uninstallAppImage('EmuDeck'),
           ),
           InstallerItem(
             title: 'An Anime Game Launcher',
@@ -33,6 +34,8 @@ class AppView extends StatelessWidget {
             onCheck: () async => await chkFileExists(
                 '$homePath/Applications/an-anime-game-launcher.AppImage'),
             onInstall: installAnAnimeGameLauncher,
+            onUninstall: () async =>
+                await uninstallAppImage('an-anime-game-launcher'),
           ),
           InstallerItem(
             title: 'The Honkers Railway Launcher',
@@ -40,6 +43,8 @@ class AppView extends StatelessWidget {
             onCheck: () async => await chkFileExists(
                 '$homePath/Applications/the-honkers-railway-launcher.AppImage'),
             onInstall: installTheHonkersRailwayLauncher,
+            onUninstall: () async =>
+                await uninstallAppImage('the-honkers-railway-launcher'),
           ),
           InstallerItem(
             title: 'Honkers Launcher',
@@ -47,6 +52,8 @@ class AppView extends StatelessWidget {
             onCheck: () async => await chkFileExists(
                 '$homePath/Applications/honkers-launcher.AppImage'),
             onInstall: installHonkersLauncher,
+            onUninstall: () async =>
+                await uninstallAppImage('honkers-launcher'),
           ),
           InstallerItem(
             title: 'Anime Games Launcher',
@@ -54,6 +61,8 @@ class AppView extends StatelessWidget {
             onCheck: () async => await chkFileExists(
                 '$homePath/Applications/anime-games-launcher.AppImage'),
             onInstall: installAnimeGamesLauncher,
+            onUninstall: () async =>
+                await uninstallAppImage('anime-games-launcher'),
           ),
         ],
       ),
