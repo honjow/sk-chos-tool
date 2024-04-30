@@ -13,40 +13,82 @@ class SwitchView extends StatelessWidget {
   Widget build(BuildContext context) {
     SwitchItemController hhdController = SwitchItemController();
     SwitchItemController handyconController = SwitchItemController();
+    SwitchItemController inputplumberController = SwitchItemController();
+
+    final isHandyconInatalled = handyconInatalled();
+    final isHHDInatalled = hhdInatalled();
+    final isInputplumberInatalled = inputplumberInatalled();
 
     return SkSingleChildScrollView(
       child: Column(
         children: [
-          SwitchItem(
-            title: 'HandyGCCS',
-            controller: handyconController,
-            description: '用来驱动部分掌机的手柄按钮',
-            onChanged: (bool value) async {
-              await toggleService('handycon.service', value);
-              if (value) {
+          if (isHandyconInatalled)
+            SwitchItem(
+              title: 'HandyGCCS',
+              controller: handyconController,
+              description: '用来驱动部分掌机的手柄按钮',
+              onChanged: (bool value) async {
+                await toggleService('handycon.service', value);
+                if (value) {
+                  if (isHHDInatalled) {
+                    await toggleService(
+                        'hhd@${Platform.environment['USER']}.service', false);
+                    hhdController.reCheck?.call();
+                  }
+                  if (isInputplumberInatalled) {
+                    await toggleService('inputplumber.service', false);
+                    inputplumberController.reCheck?.call();
+                  }
+                }
+              },
+              onCheck: () async => checkServiceAutostart('handycon.service'),
+            ),
+          if (isInputplumberInatalled)
+            SwitchItem(
+              title: 'InputPlumber',
+              controller: inputplumberController,
+              description: 'HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动',
+              onChanged: (bool value) async {
+                await toggleService('inputplumber.service', value);
+                if (value) {
+                  if (isHHDInatalled) {
+                    await toggleService(
+                        'hhd@${Platform.environment['USER']}.service', false);
+                    hhdController.reCheck?.call();
+                  }
+                  if (isHandyconInatalled) {
+                    await toggleService('handycon.service', false);
+                    handyconController.reCheck?.call();
+                  }
+                }
+              },
+              onCheck: () async =>
+                  checkServiceAutostart('inputplumber.service'),
+            ),
+          if (isHHDInatalled)
+            SwitchItem(
+              title: 'HHD',
+              controller: hhdController,
+              description:
+                  'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
+              onChanged: (bool value) async {
                 await toggleService(
-                    'hhd@${Platform.environment['USER']}.service', false);
-                hhdController.reCheck?.call();
-              }
-            },
-            onCheck: () async => checkServiceAutostart('handycon.service'),
-          ),
-          SwitchItem(
-            title: 'HHD',
-            controller: hhdController,
-            description:
-                'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
-            onChanged: (bool value) async {
-              await toggleService(
-                  'hhd@${Platform.environment['USER']}.service', value);
-              if (value) {
-                await toggleService('handycon.service', false);
-                handyconController.reCheck?.call();
-              }
-            },
-            onCheck: () async => checkServiceAutostart(
-                'hhd@${Platform.environment['USER']}.service'),
-          ),
+                    'hhd@${Platform.environment['USER']}.service', value);
+                if (value) {
+                  if (isHandyconInatalled) {
+                    await toggleService('handycon.service', false);
+                    handyconController.reCheck?.call();
+                  }
+
+                  if (isInputplumberInatalled) {
+                    await toggleService('inputplumber.service', false);
+                    inputplumberController.reCheck?.call();
+                  }
+                }
+              },
+              onCheck: () async => checkServiceAutostart(
+                  'hhd@${Platform.environment['USER']}.service'),
+            ),
           SwitchItem(
             title: 'SK Chimeraos 启动项守护服务',
             description:

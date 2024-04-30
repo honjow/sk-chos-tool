@@ -28,7 +28,7 @@ Future<bool> checkServiceAutostart(String serviceName) async {
 
 Future<void> toggleService(String serviceName, bool enable) async {
   final results = await run(
-    'sudo systemctl ${enable ? 'enable' : 'disable'} $serviceName',
+    'sudo systemctl ${enable ? 'enable' : 'disable'} --now $serviceName',
     verbose: true,
   );
   if (results.isNotEmpty) {
@@ -136,6 +136,8 @@ Future<String> getAutoupdateConfig(key) async {
   }
   final file = File('$path/autoupdate.conf');
   if (!file.existsSync()) {
+    file.create();
+    file.writeAsString('\n');
     return '';
   }
   final ini = IniFile();
@@ -170,6 +172,8 @@ Future<String> getUserConfig(String section, String key) async {
   }
   final file = File('$path/sk-chos-tool.conf');
   if (!file.existsSync()) {
+    file.create();
+    file.writeAsString('\n');
     return '';
   }
   final ini = IniFile();
@@ -348,4 +352,21 @@ Future<bool> chkEnableGithubCdn() async {
 
 Future<void> uninstallAppImage(String appName) async {
   await run('bash $SK_TOOL_SCRIPTS_PATH/appimage_uninstall.sh $appName');
+}
+
+bool chkFileExistsSync(String path) {
+  final file = File(path);
+  return file.existsSync();
+}
+
+bool handyconInatalled() {
+  return chkFileExistsSync('/usr/bin/handycon');
+}
+
+bool hhdInatalled() {
+  return chkFileExistsSync('/usr/bin/hhd');
+}
+
+bool inputplumberInatalled() {
+  return chkFileExistsSync('/usr/bin/inputplumber');
 }
