@@ -126,9 +126,18 @@ Future<void> setAutoupdate(String key, bool enable) async {
   await setAutoupdateConfig(key, enable ? 'true' : 'false');
 }
 
+Future<void> chownConfig() async {
+  final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
+  final user = Platform.environment['USER'];
+  await run('sudo chown -R $user:$user $path');
+}
+
 Future<String> getAutoupdateConfig(key) async {
   final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
   const section = 'autoupdate';
+
+  // 递归设置所属用户和组
+  await chownConfig();
 
   final dir = Directory(path);
   if (!dir.existsSync()) {
@@ -149,6 +158,9 @@ Future<void> setAutoupdateConfig(String key, String value) async {
   final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
   const section = 'autoupdate';
 
+  // 递归设置所属用户和组
+  await chownConfig();
+
   final dir = Directory(path);
   if (!dir.existsSync()) {
     await dir.create(recursive: true);
@@ -165,6 +177,9 @@ Future<void> setAutoupdateConfig(String key, String value) async {
 
 Future<String> getUserConfig(String section, String key) async {
   final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
+
+  // 递归设置所属用户和组
+  await chownConfig();
 
   final dir = Directory(path);
   if (!dir.existsSync()) {
@@ -183,6 +198,9 @@ Future<String> getUserConfig(String section, String key) async {
 
 Future<void> setUserConfig(String section, String key, String value) async {
   final path = '${Platform.environment['HOME']}/.config/sk-chos-tool';
+
+  // 递归设置所属用户和组
+  await chownConfig();
 
   final dir = Directory(path);
   if (!dir.existsSync()) {
