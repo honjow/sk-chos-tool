@@ -5,3 +5,6 @@ const Config defaultUserConfig = {
     'enable_github_cdn': 'true',
   },
 };
+
+const suspendServicePath = '/etc/systemd/system/systemd-suspend.service';
+const hiberatehDelayPath = '/etc/systemd/sleep.conf.d/99-hibernate_delay.conf';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sk_chos_tool/components/action_button.dart';
 import 'package:sk_chos_tool/components/scroll.dart';
+import 'package:sk_chos_tool/components/switch_item.dart';
 import 'package:sk_chos_tool/utils/util.dart';
 
 class AdvanceView extends StatelessWidget {
@@ -11,6 +12,17 @@ class AdvanceView extends StatelessWidget {
     return const SkSingleChildScrollView(
         child: Column(
       children: [
+        SwitchItem(
+          title: 'firmware固件覆盖',
+          description: '用启用DSDT覆盖等, 用于修复部分掌机的问题，切换后需要重启。建议开启',
+          onChanged: setFirmwareOverride,
+          onCheck: chkFirmwareOverride,
+        ),
+        SwitchItem(
+          title: 'USB 唤醒',
+          onChanged: setUsbWakeup,
+          onCheck: chkUsbWakeup,
+        ),
         ActionButtonItem(
           title: '清除缓存',
           onPressed: clearCache,

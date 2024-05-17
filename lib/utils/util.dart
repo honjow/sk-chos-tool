@@ -3,6 +3,10 @@ import 'dart:io';
 
 import 'package:ini_file/ini_file.dart';
 import 'package:process_run/process_run.dart';
+import 'package:sk_chos_tool/page/general_view.dart';
+import 'package:sk_chos_tool/utils/const.dart';
+import 'package:sk_chos_tool/utils/enum.dart';
+import 'package:sk_chos_tool/utils/log.dart';
 
 // ignore: constant_identifier_names
 const SK_TOOL_SCRIPTS_PATH = '/usr/share/sk-chos-tool/scripts';
@@ -387,4 +391,102 @@ bool hhdInatalled() {
 
 bool inputplumberInatalled() {
   return chkFileExistsSync('/usr/bin/inputplumber');
+}
+
+Future<SleepMode> getSleepMode() async {
+  logger.i('getSleepMode');
+  const filePath = suspendServicePath;
+  const hibernateContent = 'systemd-sleep hibernate';
+  const suspendThenHibernateContent = 'systemd-sleep suspend-then-hibernate';
+  try {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      return SleepMode.suspend;
+    }
+    final content = await file.readAsString();
+    if (content.contains(hibernateContent)) {
+      return SleepMode.hibernate;
+    } else if (content.contains(suspendThenHibernateContent)) {
+      return SleepMode.suspendThenHibernate;
+    }
+    return SleepMode.suspend;
+  } catch (e) {
+    return SleepMode.suspend;
+  }
+}
+
+Future<void> setSleepMode(SleepMode mode) async {
+  logger.i('setSleepMode $mode');
+  try {
+    const filePath = suspendServicePath;
+    switch (mode) {
+      case SleepMode.suspend:
+        await run('sudo rm $filePath');
+        break;
+      case SleepMode.hibernate:
+        await run(
+            'sudo cp /lib/systemd/system/systemd-hibernate.service $filePath');
+        break;
+      case SleepMode.suspendThenHibernate:
+        await run(
+            'sudo cp /lib/systemd/system/systemd-suspend-then-hibernate.service $filePath');
+        break;
+    }
+    await run('sudo systemctl daemon-reload');
+  } catch (e) {
+    rethrow;
+  }
+}
+
+Future<String> getHibernateDelay() async {
+  logger.i('getHibernateDelay');
+  const filePath = hiberatehDelayPath;
+  try {
+    final file = File(filePath);
+    if (!await file.exists()) {
+      logger.i('hibernate delay file not exists');
+      return '';
+    }
+    final content = await file.readAsString();
+    logger.i('hibernate delay content \n$content');
+    final reg = RegExp(r'HibernateDelaySec=(.+)');
+    final match = reg.firstMatch(content);
+    if (match != null) {
+      return match.group(1) ?? kDefaultHibernateDelay;
+    }
+    return '';
+  } catch (e) {
+    return '';
+  }
+}
+
+Future<String> getHibernateDelayAutoSet() async {
+  final delay = await getHibernateDelay();
+  logger.i('getHibernateDelayAutoSet $delay');
+  if (delay.isEmpty) {
+    await setHibernateDelay(kDefaultHibernateDelay);
+    return kDefaultHibernateDelay;
+  }
+  return delay;
+}
+
+Future<void> setHibernateDelay(String delay) async {
+  logger.i('setHibernateDelay $delay');
+  try {
+    const filePath = hiberatehDelayPath;
+    final file = File(filePath);
+    if (!await file.exists()) {
+      await run('sudo mkdir -p /etc/systemd/sleep.conf.d');
+      await run('sudo touch $filePath');
+    }
+    await run(
+      '''
+      bash -c "echo -e '[Sleep]\\nHibernateDelaySec=$delay' | sudo tee $filePath"
+      ''',
+    );
+    await run('sudo systemctl kill -s HUP systemd-logind');
+  } catch (e) {
+    logger.e('Failed to set hibernate delay $e');
+    rethrow;
+  }
 }

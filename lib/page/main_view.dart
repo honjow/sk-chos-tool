@@ -9,7 +9,7 @@ import 'package:sk_chos_tool/page/advance_view.dart';
 import 'package:sk_chos_tool/page/app_view.dart';
 import 'package:sk_chos_tool/page/decky_view.dart';
 import 'package:sk_chos_tool/page/ota_view.dart';
-import 'package:sk_chos_tool/page/switch_view.dart';
+import 'package:sk_chos_tool/page/general_view.dart';
 import 'package:sk_chos_tool/page/tool_view.dart';
 
 import '../const.dart';
@@ -55,7 +55,7 @@ class MainPage extends StatelessWidget {
                         return MenuView(
                           key: ValueKey(controller.itemIndex),
                           titles: const [
-                            '常用开关',
+                            '常用',
                             '工具',
                             'Decky 插件',
                             '软件&游戏',
@@ -121,7 +121,7 @@ class MainPage extends StatelessWidget {
                     controller: controller.pageController,
                     physics: const NeverScrollableScrollPhysics(),
                     children: const [
-                      SwitchView(),
+                      GeneralView(),
                       ToolView(),
                       DeckyView(),
                       AppView(),

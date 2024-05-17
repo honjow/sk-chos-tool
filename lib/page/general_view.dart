@@ -1,13 +1,40 @@
+import 'dart:collection';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:sk_chos_tool/components/dropdown_item.dart';
 import 'package:sk_chos_tool/components/scroll.dart';
+import 'package:sk_chos_tool/utils/enum.dart';
+import 'package:sk_chos_tool/utils/log.dart';
 import 'package:sk_chos_tool/utils/util.dart';
 
 import '../components/switch_item.dart';
 
-class SwitchView extends StatelessWidget {
-  const SwitchView({super.key});
+const kDropdownMenuItemAlignment = Alignment.center;
+
+final LinkedHashMap<SleepMode, String> dropdownMenuMap =
+    LinkedHashMap<SleepMode, String>()
+      ..[SleepMode.suspend] = '睡眠'
+      ..[SleepMode.hibernate] = '休眠'
+      ..[SleepMode.suspendThenHibernate] = '睡眠后休眠';
+
+const kDefaultHibernateDelay = '30min';
+
+final LinkedHashMap<String, String> delayMap = LinkedHashMap<String, String>()
+  ..['10sec'] = '10 秒'
+  ..['30sec'] = '30 秒'
+  ..['1min'] = '1 分钟'
+  ..['5min'] = '5 分钟'
+  ..['10min'] = '10 分钟'
+  ..['30min'] = '30 分钟'
+  ..['1hour'] = '1 小时'
+  ..['2hour'] = '2 小时'
+  ..['3hour'] = '3 小时'
+  ..['6hour'] = '6 小时'
+  ..['12hour'] = '12 小时';
+
+class GeneralView extends StatelessWidget {
+  const GeneralView({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -99,23 +126,13 @@ class SwitchView extends StatelessWidget {
             onCheck: () async =>
                 checkServiceAutostart('sk-auto-keep-boot-entry.service'),
           ),
-          const SwitchItem(
-            title: '休眠',
-            description: '开启后按下电源键会进入休眠状态, 否则是睡眠状态',
-            onChanged: setHibernate,
-            onCheck: chkHibernate,
-          ),
-          const SwitchItem(
-            title: 'firmware固件覆盖',
-            description: '用启用DSDT覆盖等, 用于修复部分掌机的问题，切换后需要重启。建议开启',
-            onChanged: setFirmwareOverride,
-            onCheck: chkFirmwareOverride,
-          ),
-          const SwitchItem(
-            title: 'USB 唤醒',
-            onChanged: setUsbWakeup,
-            onCheck: chkUsbWakeup,
-          ),
+          // const SwitchItem(
+          //   title: '休眠',
+          //   description: '开启后按下电源键会进入休眠状态, 否则是睡眠状态',
+          //   onChanged: setHibernate,
+          //   onCheck: chkHibernate,
+          // ),
+          const SleepModeComponent(),
           const SwitchItem(
             title: 'Github 下载加速',
             description:
@@ -125,6 +142,66 @@ class SwitchView extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class SleepModeComponent extends StatefulWidget {
+  const SleepModeComponent({super.key});
+
+  @override
+  State<SleepModeComponent> createState() => _SleepModeComponentState();
+}
+
+class _SleepModeComponentState extends State<SleepModeComponent> {
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        DropdownItem<SleepMode>(
+          title: '睡眠模式',
+          description:
+              '选择睡眠模式, 睡眠是默认选择。休眠是将系统状态保存到硬盘，再关机，速度较慢。睡眠后休眠 是先睡眠，在达到设置的时间后自动休眠，但是部分设备上可能存在问题',
+          value: SleepMode.suspend,
+          onCheck: () async {
+            final mode = await getSleepMode();
+            logger.i('Sleep mode: $mode');
+            return mode;
+          },
+          onChanged: (val) async {
+            setState(() {});
+            await setSleepMode(val);
+          },
+          items: dropdownMenuMap.entries
+              .map((e) => DropdownMenuItem(
+                    alignment: kDropdownMenuItemAlignment,
+                    value: e.key,
+                    child: Text(e.value),
+                  ))
+              .toList(),
+        ),
+        DropdownItem<String>(
+          title: '睡眠后休眠延迟',
+          description: '选择睡眠后休眠的延迟时间',
+          value: kDefaultHibernateDelay,
+          onCheck: () async {
+            final delay = await getHibernateDelayAutoSet();
+            logger.i('Sleep delay: $delay');
+            return delay;
+          },
+          onChanged: (val) async {
+            setState(() {});
+            await setHibernateDelay(val);
+          },
+          items: delayMap.entries
+              .map((e) => DropdownMenuItem(
+                    alignment: kDropdownMenuItemAlignment,
+                    value: e.key,
+                    child: Text(e.value),
+                  ))
+              .toList(),
+        ),
+      ],
     );
   }
 }
