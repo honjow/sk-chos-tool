@@ -154,6 +154,7 @@ class SleepModeComponent extends StatefulWidget {
 }
 
 class _SleepModeComponentState extends State<SleepModeComponent> {
+  bool _showDelayMenu = false;
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -166,10 +167,15 @@ class _SleepModeComponentState extends State<SleepModeComponent> {
           onCheck: () async {
             final mode = await getSleepMode();
             logger.i('Sleep mode: $mode');
+            setState(() {
+              _showDelayMenu = mode == SleepMode.suspendThenHibernate;
+            });
             return mode;
           },
           onChanged: (val) async {
-            setState(() {});
+            setState(() {
+              _showDelayMenu = val == SleepMode.suspendThenHibernate;
+            });
             await setSleepMode(val);
           },
           items: dropdownMenuMap.entries
@@ -180,27 +186,28 @@ class _SleepModeComponentState extends State<SleepModeComponent> {
                   ))
               .toList(),
         ),
-        DropdownItem<String>(
-          title: '睡眠后休眠延迟',
-          description: '选择睡眠后休眠的延迟时间',
-          value: kDefaultHibernateDelay,
-          onCheck: () async {
-            final delay = await getHibernateDelayAutoSet();
-            logger.i('Sleep delay: $delay');
-            return delay;
-          },
-          onChanged: (val) async {
-            setState(() {});
-            await setHibernateDelay(val);
-          },
-          items: delayMap.entries
-              .map((e) => DropdownMenuItem(
-                    alignment: kDropdownMenuItemAlignment,
-                    value: e.key,
-                    child: Text(e.value),
-                  ))
-              .toList(),
-        ),
+        if (_showDelayMenu)
+          DropdownItem<String>(
+            title: '睡眠后休眠延迟',
+            description: '选择睡眠后休眠的延迟时间',
+            value: kDefaultHibernateDelay,
+            onCheck: () async {
+              final delay = await getHibernateDelayAutoSet();
+              logger.i('Sleep delay: $delay');
+              return delay;
+            },
+            onChanged: (val) async {
+              setState(() {});
+              await setHibernateDelay(val);
+            },
+            items: delayMap.entries
+                .map((e) => DropdownMenuItem(
+                      alignment: kDropdownMenuItemAlignment,
+                      value: e.key,
+                      child: Text(e.value),
+                    ))
+                .toList(),
+          ),
       ],
     );
   }
