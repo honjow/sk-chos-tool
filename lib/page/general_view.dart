@@ -121,10 +121,10 @@ class GeneralView extends StatelessWidget {
             description:
                 '开启后, 每次启动 Sk-Chimeraos 都会将自身启动项作为下次启动项, 解决双系统启动项维持问题。最好配合 Windows 启动到 Sk-Chimeraos 的功能使用, 否则建议关闭',
             onChanged: (bool value) async {
-              await toggleService('sk-auto-keep-boot-entry.service', value);
+              await toggleService('sk-setup-next-boot.service', value);
             },
             onCheck: () async =>
-                checkServiceAutostart('sk-auto-keep-boot-entry.service'),
+                checkServiceAutostart('sk-setup-next-boot.service'),
           ),
           // const SwitchItem(
           //   title: '休眠',
