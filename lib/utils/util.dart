@@ -36,19 +36,16 @@ Future<bool> checkServiceMasked(String serviceName) async {
 }
 
 Future<void> toggleService(String serviceName, bool enable) async {
-  final results = await run(
-    'sudo systemctl ${enable ? 'enable' : 'disable'} --now $serviceName',
-    verbose: true,
-  );
-  if (results.isNotEmpty) {
-    final result = results.first;
-    final code = result.exitCode;
-    final stdout = result.stdout.toString();
-    if (code == 0) {
-      return;
-    }
+  final currentStatus = await getServiceEnableStatus(serviceName);
+  late final String command;
+  if (enable && currentStatus != 'enabled') {
+    command = 'sudo systemctl enable --now $serviceName';
+  } else if (!enable && currentStatus == 'enabled') {
+    command = 'sudo systemctl disable --now $serviceName';
+  } else {
+    return;
   }
-  throw Exception('Failed to toggle service');
+  await run(command);
 }
 
 Future<void> toggleServiceMask(String serviceName, bool mask) async {
@@ -74,8 +71,8 @@ Future<void> toggleHandheldService(String serviceName, bool enable) async {
     late bool valMask;
     late bool valEnable;
     if (enable) {
-      valMask = service == serviceName;
-      valEnable = service != serviceName;
+      valMask = service != serviceName;
+      valEnable = service == serviceName;
     } else {
       valMask = true;
       valEnable = false;
