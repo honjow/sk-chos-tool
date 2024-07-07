@@ -11,23 +11,28 @@ import 'package:sk_chos_tool/utils/log.dart';
 // ignore: constant_identifier_names
 const SK_TOOL_SCRIPTS_PATH = '/usr/share/sk-chos-tool/scripts';
 
-Future<bool> checkServiceAutostart(String serviceName) async {
+Future<String> getServiceEnableStatus(String serviceName) async {
   final results = await run(
     'sudo systemctl is-enabled $serviceName',
     verbose: true,
     throwOnError: false,
   );
   if (results.isEmpty) {
-    return false;
+    return 'disabled';
   }
   final result = results.first;
-  final code = result.exitCode;
-  final stdout = result.stdout.toString();
-  if (stdout.contains('enabled')) {
-    return true;
-  }
 
-  return false;
+  return result.stdout.toString().trim();
+}
+
+Future<bool> checkServiceEnabled(String serviceName) async {
+  final status = await getServiceEnableStatus(serviceName);
+  return status == 'enabled';
+}
+
+Future<bool> checkServiceMasked(String serviceName) async {
+  final status = await getServiceEnableStatus(serviceName);
+  return status == 'masked';
 }
 
 Future<void> toggleService(String serviceName, bool enable) async {
@@ -44,6 +49,40 @@ Future<void> toggleService(String serviceName, bool enable) async {
     }
   }
   throw Exception('Failed to toggle service');
+}
+
+Future<void> toggleServiceMask(String serviceName, bool mask) async {
+  final currentStatus = await getServiceEnableStatus(serviceName);
+  late final String command;
+  if (mask && currentStatus != 'masked') {
+    command = 'sudo systemctl mask $serviceName';
+  } else if (!mask && currentStatus == 'masked') {
+    command = 'sudo systemctl unmask $serviceName';
+  } else {
+    return;
+  }
+  await run(command);
+}
+
+Future<void> toggleHandheldService(String serviceName, bool enable) async {
+  final allService = [
+    'handycon.service',
+    'hhd@${Platform.environment['USER']}.service',
+    'inputplumber.service',
+  ];
+  for (final service in allService) {
+    late bool valMask;
+    late bool valEnable;
+    if (enable) {
+      valMask = service == serviceName;
+      valEnable = service != serviceName;
+    } else {
+      valMask = true;
+      valEnable = false;
+    }
+    await toggleServiceMask(service, valMask);
+    await toggleService(service, valEnable);
+  }
 }
 
 Future<bool> chkHibernate() async {

@@ -31,7 +31,7 @@ class _OtaViewState extends State<OtaView> {
               });
             },
             onCheck: () async =>
-                checkServiceAutostart('sk-chos-tool-autoupdate.timer'),
+                checkServiceEnabled('sk-chos-tool-autoupdate.timer'),
           ),
           SwitchItem(
             title: '自动更新本软件',

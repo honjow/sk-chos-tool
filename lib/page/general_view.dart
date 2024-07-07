@@ -55,20 +55,20 @@ class GeneralView extends StatelessWidget {
               controller: handyconController,
               description: '用来驱动部分掌机的手柄按钮',
               onChanged: (bool value) async {
-                await toggleService('handycon.service', value);
+                await toggleHandheldService('handycon.service', value);
                 if (value) {
                   if (isHHDInatalled) {
-                    await toggleService(
-                        'hhd@${Platform.environment['USER']}.service', false);
+                    // await toggleHandheldService(
+                    //     'hhd@${Platform.environment['USER']}.service', false);
                     hhdController.reCheck?.call();
                   }
                   if (isInputplumberInatalled) {
-                    await toggleService('inputplumber.service', false);
+                    // await toggleHandheldService('inputplumber.service', false);
                     inputplumberController.reCheck?.call();
                   }
                 }
               },
-              onCheck: () async => checkServiceAutostart('handycon.service'),
+              onCheck: () async => checkServiceEnabled('handycon.service'),
             ),
           if (isInputplumberInatalled)
             SwitchItem(
@@ -76,21 +76,20 @@ class GeneralView extends StatelessWidget {
               controller: inputplumberController,
               description: 'HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动',
               onChanged: (bool value) async {
-                await toggleService('inputplumber.service', value);
+                await toggleHandheldService('inputplumber.service', value);
                 if (value) {
                   if (isHHDInatalled) {
-                    await toggleService(
-                        'hhd@${Platform.environment['USER']}.service', false);
+                    // await toggleHandheldService(
+                    //     'hhd@${Platform.environment['USER']}.service', false);
                     hhdController.reCheck?.call();
                   }
                   if (isHandyconInatalled) {
-                    await toggleService('handycon.service', false);
+                    // await toggleHandheldService('handycon.service', false);
                     handyconController.reCheck?.call();
                   }
                 }
               },
-              onCheck: () async =>
-                  checkServiceAutostart('inputplumber.service'),
+              onCheck: () async => checkServiceEnabled('inputplumber.service'),
             ),
           if (isHHDInatalled)
             SwitchItem(
@@ -99,21 +98,21 @@ class GeneralView extends StatelessWidget {
               description:
                   'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
               onChanged: (bool value) async {
-                await toggleService(
+                await toggleHandheldService(
                     'hhd@${Platform.environment['USER']}.service', value);
                 if (value) {
                   if (isHandyconInatalled) {
-                    await toggleService('handycon.service', false);
+                    // await toggleHandheldService('handycon.service', false);
                     handyconController.reCheck?.call();
                   }
 
                   if (isInputplumberInatalled) {
-                    await toggleService('inputplumber.service', false);
+                    // await toggleHandheldService('inputplumber.service', false);
                     inputplumberController.reCheck?.call();
                   }
                 }
               },
-              onCheck: () async => checkServiceAutostart(
+              onCheck: () async => checkServiceEnabled(
                   'hhd@${Platform.environment['USER']}.service'),
             ),
           SwitchItem(
@@ -124,7 +123,7 @@ class GeneralView extends StatelessWidget {
               await toggleService('sk-setup-next-boot.service', value);
             },
             onCheck: () async =>
-                checkServiceAutostart('sk-setup-next-boot.service'),
+                checkServiceEnabled('sk-setup-next-boot.service'),
           ),
           // const SwitchItem(
           //   title: '休眠',
