@@ -46,6 +46,15 @@ class AppView extends StatelessWidget {
             onUninstall: () async =>
                 await uninstallAppImage('the-honkers-railway-launcher'),
           ),
+          // sleepy_launcher_install
+          InstallerItem(
+            title: 'Sleepy Launcher',
+            description: '绝区零 启动器',
+            onCheck: () async => await chkFileExists(
+                '$homePath/Applications/sleepy-launcher.AppImage'),
+            onInstall: installSleepyLauncher,
+            onUninstall: () async => await uninstallAppImage('sleepy-launcher'),
+          ),
           InstallerItem(
             title: 'Honkers Launcher',
             description: '崩坏3 启动器',

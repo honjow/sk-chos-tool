@@ -331,6 +331,14 @@ Future<void> installTheHonkersRailwayLauncher() async {
   await run(command);
 }
 
+// sleepy_launcher_install.sh
+Future<void> installSleepyLauncher() async {
+  final param = await getCdnParam();
+  final command =
+      'bash $SK_TOOL_SCRIPTS_PATH/sleepy-launcher_install.sh $param';
+  await run(command);
+}
+
 // honkers_launcher_install
 Future<void> installHonkersLauncher() async {
   final param = await getCdnParam();
