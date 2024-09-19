@@ -412,8 +412,8 @@ Future<void> setEnableGithubCdn(bool enable) async {
 // chk enable_github_cdn
 Future<bool> chkEnableGithubCdn() async {
   final val = await getUserConfig('download', 'enable_github_cdn');
-  // 默认 true
-  return val != 'false';
+  // 默认 false
+  return val == 'true';
 }
 
 Future<void> uninstallAppImage(String appName) async {
