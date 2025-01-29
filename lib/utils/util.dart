@@ -79,6 +79,11 @@ Future<void> toggleHandheldService(String serviceName, bool enable) async {
     }
     await toggleServiceMask(service, valMask);
     await toggleService(service, valEnable);
+
+    // steam-powerbuttond 跟随 inputplumber 启用
+    if (service == 'inputplumber.service') {
+      await toggleService('steam-powerbuttond.service', valEnable);
+    }
   }
 }
 

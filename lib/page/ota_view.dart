@@ -39,12 +39,12 @@ class _OtaViewState extends State<OtaView> {
             onCheck: () async => chkAutoupdate(sktKey),
             enabled: _enableUpdate,
           ),
-          SwitchItem(
-            title: '自动更新 HandyGCCS',
-            onChanged: (bool value) async => setAutoupdate(handyKey, value),
-            onCheck: () async => chkAutoupdate(handyKey),
-            enabled: _enableUpdate,
-          ),
+          // SwitchItem(
+          //   title: '自动更新 HandyGCCS',
+          //   onChanged: (bool value) async => setAutoupdate(handyKey, value),
+          //   onCheck: () async => chkAutoupdate(handyKey),
+          //   enabled: _enableUpdate,
+          // ),
           SwitchItem(
             title: '自动更新 HHD',
             onChanged: (bool value) async => setAutoupdate(hhdKey, value),
