@@ -33,7 +33,7 @@ class AdvanceView extends StatelessWidget {
         ),
         ActionButtonItem(
           title: '重新运行首次自动配置脚本',
-          description: '从预下载路径中安装Decky、Decky插件、手柄映射等。初始化Sk-ChimeraOS的一些用户配置',
+          description: '从预下载路径中安装Decky、Decky插件、手柄映射等。初始化SkorionOS的一些用户配置',
           onPressed: reFirstRun,
         ),
         ActionButtonItem(

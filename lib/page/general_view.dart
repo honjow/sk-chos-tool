@@ -116,9 +116,9 @@ class GeneralView extends StatelessWidget {
                   'hhd@${Platform.environment['USER']}.service'),
             ),
           SwitchItem(
-            title: 'SK Chimeraos 启动项守护服务',
+            title: 'SkorionOS 启动项守护服务',
             description:
-                '开启后, 每次启动 Sk-Chimeraos 都会将自身启动项作为下次启动项, 解决双系统启动项维持问题。最好配合 Windows 启动到 Sk-Chimeraos 的功能使用, 否则建议关闭',
+                '开启后, 每次启动 SkorionOS 都会将自身启动项作为下次启动项, 解决双系统启动项维持问题。最好配合 Windows 启动到 SkorionOS 的功能使用, 否则建议关闭',
             onChanged: (bool value) async {
               await toggleService('sk-setup-next-boot.service', value);
             },
@@ -132,13 +132,13 @@ class GeneralView extends StatelessWidget {
           //   onCheck: chkHibernate,
           // ),
           const SleepModeComponent(),
-          const SwitchItem(
-            title: 'Github 下载加速',
-            description:
-                '开启后会随机使用内置的加速源下载 Github 文件，但某些时候可能会导致下载缓慢或者下载失败。在网络条件较好时建议关闭',
-            onChanged: setEnableGithubCdn,
-            onCheck: chkEnableGithubCdn,
-          ),
+          // const SwitchItem(
+          //   title: 'Github 下载加速',
+          //   description:
+          //       '开启后会随机使用内置的加速源下载 Github 文件，但某些时候可能会导致下载缓慢或者下载失败。在网络条件较好时建议关闭',
+          //   onChanged: setEnableGithubCdn,
+          //   onCheck: chkEnableGithubCdn,
+          // ),
         ],
       ),
     );

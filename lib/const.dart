@@ -8,7 +8,7 @@ const kFontFamilyFallback = [
 ];
 
 final ButtonStyle buttonStyle = ButtonStyle(
-  shape: MaterialStateProperty.all(
+  shape: WidgetStateProperty.all(
     RoundedRectangleBorder(
       side: const BorderSide(
         width: 1.5,
@@ -17,6 +17,6 @@ final ButtonStyle buttonStyle = ButtonStyle(
       borderRadius: BorderRadius.circular(10),
     ),
   ),
-  padding: MaterialStateProperty.all(
+  padding: WidgetStateProperty.all(
       const EdgeInsets.symmetric(vertical: 14, horizontal: 8)),
 );

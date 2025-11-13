@@ -10,8 +10,7 @@ class AboutView extends StatelessWidget {
     final fonstStyleMedium = Theme.of(context).textTheme.bodyMedium;
     return Column(
       children: [
-        Text('SK ChimeraOS Tool',
-            style: Theme.of(context).textTheme.titleLarge),
+        Text('SkorionOS Tool', style: Theme.of(context).textTheme.titleLarge),
         // Text('Version: 1.0.0', style: Theme.of(context).textTheme.bodyMedium),
         Text('Author: honjow', style: fonstStyleMedium),
         SelectionArea(

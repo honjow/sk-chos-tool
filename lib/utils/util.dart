@@ -285,25 +285,27 @@ Future<bool> chkFileExists(String path) async {
 }
 
 Future<String> getGithubReleaseCdn() async {
-  const confPath = '/etc/sk-chos-tool/github_cdn.conf';
-  final ini = IniFile();
-  await ini.readFile(confPath);
-  final cdns = ini.getItem('release', 'server') ?? '';
-  final cdnList = cdns.split(':::');
-  // random select one
-  cdnList.shuffle();
-  return cdnList.first;
+  return '';
+  // const confPath = '/etc/sk-chos-tool/github_cdn.conf';
+  // final ini = IniFile();
+  // await ini.readFile(confPath);
+  // final cdns = ini.getItem('release', 'server') ?? '';
+  // final cdnList = cdns.split(':::');
+  // // random select one
+  // cdnList.shuffle();
+  // return cdnList.first;
 }
 
 Future<String> getGithubRawCdn() async {
-  const confPath = '/etc/sk-chos-tool/github_cdn.conf';
-  final ini = IniFile();
-  await ini.readFile(confPath);
-  final cdns = ini.getItem('raw', 'server') ?? '';
-  final cdnList = cdns.split(':::');
-  // random select one
-  cdnList.shuffle();
-  return cdnList.first;
+  return '';
+  // const confPath = '/etc/sk-chos-tool/github_cdn.conf';
+  // final ini = IniFile();
+  // await ini.readFile(confPath);
+  // final cdns = ini.getItem('raw', 'server') ?? '';
+  // final cdnList = cdns.split(':::');
+  // // random select one
+  // cdnList.shuffle();
+  // return cdnList.first;
 }
 
 Future<void> installEmuDeck() async {
@@ -359,9 +361,10 @@ Future<(String, String)> getCdn() async {
 }
 
 Future<String> getCdnParam() async {
-  final releasePrefix = await getGithubReleaseCdn();
-  final rawPrefix = await getGithubRawCdn();
-  return await chkEnableGithubCdn() ? '$releasePrefix $rawPrefix' : '';
+  return '';
+  // final releasePrefix = await getGithubReleaseCdn();
+  // final rawPrefix = await getGithubRawCdn();
+  // return await chkEnableGithubCdn() ? '$releasePrefix $rawPrefix' : '';
 }
 
 // make_swapfile
@@ -418,7 +421,7 @@ Future<void> setEnableGithubCdn(bool enable) async {
 Future<bool> chkEnableGithubCdn() async {
   final val = await getUserConfig('download', 'enable_github_cdn');
   // 默认 false
-  return val == 'true';
+  return val == 'false';
 }
 
 Future<void> uninstallAppImage(String appName) async {

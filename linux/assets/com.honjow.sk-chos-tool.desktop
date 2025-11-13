@@ -1,7 +1,7 @@
 [Desktop Entry]
 Type=Application
-Name=SK ChimeraOS Tool
-Comment=A tool to manage SK ChimeraOS
+Name=SkorionOS Tool
+Comment=A tool to manage SkorionOS
 Exec=sk_chos_tool
 Icon=com.honjow.sk-chos-tool
 Categories=System;Utility;

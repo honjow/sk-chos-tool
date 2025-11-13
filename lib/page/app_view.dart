@@ -16,7 +16,7 @@ class AppView extends StatelessWidget {
         children: [
           InstallerItem(
             title: '本程序',
-            description: 'Sk ChimeraOS Tool',
+            description: 'SkorionOS Tool',
             onCheck: () => true,
             onInstall: installSkChosTool,
           ),

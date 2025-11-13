@@ -21,12 +21,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v5
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-channel: 'stable'
+          channel: 'stable'
 
       - name: Flutter Pub Get
         run: |
@@ -51,7 +51,7 @@ jobs:
           bash appimage.sh
 
       - name: Archive production artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v5
         with:
           name: sk-chos-tool
           path: sk_chos_tool-latest-x86_64.AppImage
@@ -63,7 +63,7 @@ jobs:
     steps:
       - run: mkdir /tmp/artifacts
       - name: Download production artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
           name: sk-chos-tool
           path: /tmp/artifacts
@@ -72,7 +72,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
