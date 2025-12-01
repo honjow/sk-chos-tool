@@ -58,12 +58,9 @@ class GeneralView extends StatelessWidget {
                 await toggleHandheldService('handycon.service', value);
                 if (value) {
                   if (isHHDInatalled) {
-                    // await toggleHandheldService(
-                    //     'hhd@${Platform.environment['USER']}.service', false);
                     hhdController.reCheck?.call();
                   }
                   if (isInputplumberInatalled) {
-                    // await toggleHandheldService('inputplumber.service', false);
                     inputplumberController.reCheck?.call();
                   }
                 }
@@ -79,12 +76,9 @@ class GeneralView extends StatelessWidget {
                 await toggleHandheldService('inputplumber.service', value);
                 if (value) {
                   if (isHHDInatalled) {
-                    // await toggleHandheldService(
-                    //     'hhd@${Platform.environment['USER']}.service', false);
                     hhdController.reCheck?.call();
                   }
                   if (isHandyconInatalled) {
-                    // await toggleHandheldService('handycon.service', false);
                     handyconController.reCheck?.call();
                   }
                 }
@@ -99,7 +93,8 @@ class GeneralView extends StatelessWidget {
                   'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
               onChanged: (bool value) async {
                 await toggleHandheldService(
-                    'hhd@${Platform.environment['USER']}.service', value);
+                    'hhd@${Platform.environment['USER']}.service', !value);
+                await toggleHandheldService('hhd.service', value);
                 if (value) {
                   if (isHandyconInatalled) {
                     // await toggleHandheldService('handycon.service', false);
@@ -112,8 +107,10 @@ class GeneralView extends StatelessWidget {
                   }
                 }
               },
-              onCheck: () async => checkServiceEnabled(
-                  'hhd@${Platform.environment['USER']}.service'),
+              onCheck: () async {
+                return await checkServiceEnabled(
+                  'hhd@${Platform.environment['USER']}.service') || await checkServiceEnabled('hhd.service');
+              },
             ),
           SwitchItem(
             title: 'SkorionOS 启动项守护服务',

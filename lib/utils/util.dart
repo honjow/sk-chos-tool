@@ -65,6 +65,7 @@ Future<void> toggleHandheldService(String serviceName, bool enable) async {
   final allService = [
     'handycon.service',
     'hhd@${Platform.environment['USER']}.service',
+    'hhd.service',
     'inputplumber.service',
   ];
   for (final service in allService) {
