@@ -273,11 +273,11 @@ class LogPanel extends StatelessWidget {
                 return Material(
                   color: Colors.transparent,
                   child: InkWell(
-                    onTap: () => controller.currentTaskId.value = task.taskId,
+                    onTap: () => controller.switchToTask(task.taskId),
                     borderRadius: BorderRadius.circular(20),
                     child: Container(
                       padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8), // 增大 padding
+                          horizontal: 16, vertical: 6), // 减小垂直padding
                       decoration: BoxDecoration(
                         color: isActive
                             ? colorScheme.primaryContainer
@@ -292,6 +292,7 @@ class LogPanel extends StatelessWidget {
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center, // 添加居中对齐
                         children: [
                           if (task.isRunning.value)
                             SizedBox(
@@ -330,20 +331,23 @@ class LogPanel extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // 关闭按钮 - 触屏优化
-                          Material(
-                            color: Colors.transparent,
-                            child: InkWell(
-                              onTap: () => controller.removeTask(task.taskId),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Padding(
-                                padding: const EdgeInsets.all(4), // 增加点击区域
-                                child: Icon(
-                                  Icons.close_rounded,
-                                  color: isActive
-                                      ? colorScheme.onPrimaryContainer
-                                      : colorScheme.onSurfaceVariant,
-                                  size: 18, // 增大关闭按钮
+                          // 关闭按钮 - 垂直居中
+                          Center(
+                            // 添加Center确保居中
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () => controller.removeTask(task.taskId),
+                                borderRadius: BorderRadius.circular(12),
+                                child: Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: Icon(
+                                    Icons.close_rounded,
+                                    color: isActive
+                                        ? colorScheme.onPrimaryContainer
+                                        : colorScheme.onSurfaceVariant,
+                                    size: 18,
+                                  ),
                                 ),
                               ),
                             ),
@@ -429,6 +433,10 @@ class _LogContentViewState extends State<_LogContentView> {
   void _onScroll() {
     // 如果用户手动向上滚动，禁用自动滚动
     if (_scrollController.hasClients) {
+      // 用户滚动也标记为交互
+      final controller = Get.find<LogController>();
+      controller.userInteracted.value = true;
+
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
       // 距离底部 100 像素内认为是在底部

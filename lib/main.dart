@@ -3,24 +3,48 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:sk_chos_tool/controller/main_controller.dart';
 import 'package:sk_chos_tool/page/main_view.dart';
+import 'package:sk_chos_tool/utils/window_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.lazyPut(() => MainController(), fenix: true);
   runApp(const MyApp());
-  doWhenWindowReady(() {
-    // const initialSize = Size(1024, 576);
-    // appWindow.minSize = const Size(800, 400);
-    // appWindow.size = initialSize;
-    // appWindow.alignment = Alignment.center;
-    appWindow.show();
+
+  doWhenWindowReady(() async {
+    // Restore window state (position, size, maximized)
+    await WindowStateManager.restoreWindowState();
   });
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    // Save window state when app is paused or detached
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.detached) {
+      WindowStateManager.saveWindowState();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
