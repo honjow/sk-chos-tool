@@ -27,6 +27,12 @@ class LogController extends GetxController {
   final tasks = <TaskLog>[].obs;
   final currentTaskId = ''.obs;
   final isExpanded = false.obs;
+  final panelHeight = 250.0.obs; // 添加可调节高度
+
+  // 高度限制
+  static const double minHeight = 100.0;
+  static const double maxHeight = 600.0;
+  static const double collapsedHeight = 40.0;
 
   /// Start a new task and return the task object
   TaskLog startTask(String taskName) {
@@ -71,5 +77,11 @@ class LogController extends GetxController {
   void clearAll() {
     tasks.clear();
     isExpanded.value = false;
+  }
+
+  /// Update panel height (called during drag)
+  void updateHeight(double delta) {
+    final newHeight = panelHeight.value - delta; // 减去delta因为是向上拖动
+    panelHeight.value = newHeight.clamp(minHeight, maxHeight);
   }
 }
