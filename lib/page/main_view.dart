@@ -28,7 +28,7 @@ class MainPage extends StatelessWidget {
       body: Row(
         children: [
           SizedBox(
-            width: 240,
+            width: AppSizes.menuWidth,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10),
               child: Column(
@@ -38,15 +38,10 @@ class MainPage extends StatelessWidget {
                   // WindowTitleBarBox(
                   //   child: MoveWindow(),
                   // ),
-                  const Padding(
-                    padding: EdgeInsets.only(bottom: 8, top: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8, top: 8),
                     child: Center(
-                      child: Text('Sk Tool',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.normal,
-                            fontFamilyFallback: kFontFamilyFallback,
-                          )),
+                      child: Text('Sk Tool', style: AppTextStyles.menuTitle),
                     ),
                   ),
                   Expanded(

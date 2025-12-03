@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sk_chos_tool/components/item_layout.dart';
+import 'package:sk_chos_tool/const.dart';
 
 class SwitchItemController {
   SwitchItemController();
@@ -50,55 +52,34 @@ class _SwitchItemState extends State<SwitchItem> {
   Future<void> checkValue() async {
     if (widget.onCheck != null) {
       final value = await widget.onCheck!();
-      setState(() {
-        _value = value;
-      });
+      if (mounted) {
+        setState(() {
+          _value = value;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (widget.description != null)
-                  Text(
-                    widget.description!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Switch(
-              value: _value,
-              onChanged: widget.enabled
-                  ? (bool value) {
-                      widget.onChanged?.call(value);
-                      setState(() {
-                        _value = value;
-                      });
-                    }
-                  : null,
-            ),
-          ),
-        ],
+    return ItemLayout(
+      title: widget.title,
+      description: widget.description,
+      trailing: Padding(
+        padding: AppPadding.smallPadding,
+        child: Switch(
+          value: _value,
+          onChanged: widget.enabled
+              ? (bool value) {
+                  widget.onChanged?.call(value);
+                  if (mounted) {
+                    setState(() {
+                      _value = value;
+                    });
+                  }
+                }
+              : null,
+        ),
       ),
     );
   }

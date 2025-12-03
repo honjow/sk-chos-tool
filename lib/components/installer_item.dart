@@ -52,43 +52,32 @@ class _InstallerItemState extends State<InstallerItem> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      padding: AppPadding.itemPadding,
       child: Row(
         children: [
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
+                Text(widget.title, style: AppTextStyles.itemTitle),
                 if (widget.description != null)
-                  Text(
-                    widget.description!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
+                  Text(widget.description!,
+                      style: AppTextStyles.itemDescription),
               ],
             ),
           ),
           if (_isLoading)
-            const Padding(
-              padding: EdgeInsets.all(8.0),
+            Padding(
+              padding: AppPadding.smallPadding,
               child: SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(),
+                width: AppSizes.loadingIndicatorSize,
+                height: AppSizes.loadingIndicatorSize,
+                child: const CircularProgressIndicator(),
               ),
             ),
           if (widget.onUninstall != null && _installed)
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: AppPadding.smallPadding,
               child: ElevatedButton(
                 style: elevatedButtonStyle,
                 onPressed: _isLoading
@@ -123,7 +112,7 @@ class _InstallerItemState extends State<InstallerItem> {
             ),
           if (widget.onInstall != null)
             Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: AppPadding.smallPadding,
               child: ElevatedButton(
                 style: elevatedButtonStyle,
                 onPressed: _isLoading

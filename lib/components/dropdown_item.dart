@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:sk_chos_tool/components/item_layout.dart';
 
 class DropdownItem<T> extends StatefulWidget {
   const DropdownItem({
@@ -40,59 +41,37 @@ class _DropdownItemState<T> extends State<DropdownItem<T>> {
   Future<void> checkValue() async {
     if (widget.onCheck != null) {
       final value = await widget.onCheck!();
-      setState(() {
-        _value = value;
-      });
+      if (mounted) {
+        setState(() {
+          _value = value;
+        });
+      }
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
-      child: Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                if (widget.description != null)
-                  Text(
-                    widget.description!,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          // dropdown
-          DropdownButton<T>(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            alignment: Alignment.center,
-            value: _value,
-            onChanged: (T? newValue) {
-              setState(() {
-                _value = newValue;
-                if (widget.onChanged != null) {
-                  final value = _value;
-                  if (value != null) {
-                    widget.onChanged?.call(value);
-                  }
+    return ItemLayout(
+      title: widget.title,
+      description: widget.description,
+      trailing: DropdownButton<T>(
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        alignment: Alignment.center,
+        value: _value,
+        onChanged: (T? newValue) {
+          if (mounted) {
+            setState(() {
+              _value = newValue;
+              if (widget.onChanged != null) {
+                final value = _value;
+                if (value != null) {
+                  widget.onChanged?.call(value);
                 }
-              });
-            },
-            items: widget.items,
-          ),
-        ],
+              }
+            });
+          }
+        },
+        items: widget.items,
       ),
     );
   }

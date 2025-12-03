@@ -76,7 +76,7 @@ class ActionButtonItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+      padding: AppPadding.actionItemPadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -86,13 +86,7 @@ class ActionButtonItem extends StatelessWidget {
           ),
           if (description != null) const SizedBox(height: 4),
           if (description != null)
-            Text(
-              description!,
-              style: const TextStyle(
-                fontSize: 12,
-                color: Colors.grey,
-              ),
-            ),
+            Text(description!, style: AppTextStyles.itemDescription),
         ],
       ),
     );
