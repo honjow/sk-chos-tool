@@ -1,21 +1,36 @@
-import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:sk_chos_tool/controller/main_controller.dart';
 import 'package:sk_chos_tool/page/main_view.dart';
 import 'package:sk_chos_tool/utils/window_state.dart';
+import 'package:sk_chos_tool/utils/theme_sync.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
 
+  // Configure window options - use normal to show GTK header bar
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(800, 550),
+    minimumSize: Size(800, 400),
+    center: true,
+    backgroundColor: Colors.transparent,
+    skipTaskbar: false,
+    titleBarStyle: TitleBarStyle.normal, // Keep system decorations
+  );
+
+  // Wait until ready to show window
+  windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await WindowStateManager.restoreWindowState();
+    await windowManager.show();
+    await windowManager.focus();
+    // Notify native side that Flutter is ready to hide loading
+    await ThemeSync.notifyFlutterReady();
+  });
+
   Get.lazyPut(() => MainController(), fenix: true);
   runApp(const MyApp());
-
-  doWhenWindowReady(() async {
-    await WindowStateManager.restoreWindowState();
-  });
 }
 
 class MyApp extends StatefulWidget {
@@ -85,6 +100,13 @@ class _MyAppState extends State<MyApp> with WindowListener {
         useMaterial3: true,
       ),
       home: const MainPage(title: 'SkorionOS Tool'),
+      builder: (context, child) {
+        // Sync header bar color with Flutter theme
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          ThemeSync.updateHeaderBarColor(context);
+        });
+        return child ?? const SizedBox.shrink();
+      },
     );
   }
 }

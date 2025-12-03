@@ -47,3 +47,4 @@ appimage-build
 *.AppImage
 *.AppImage.zsync
 AppDir
+.vscode/

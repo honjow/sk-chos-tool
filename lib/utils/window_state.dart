@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:bitsdojo_window/bitsdojo_window.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:sk_chos_tool/utils/log.dart';
@@ -18,9 +18,9 @@ class WindowStateManager {
   static Future<void> saveWindowState() async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      final position = appWindow.position;
-      final size = appWindow.size;
-      final isMaximized = appWindow.isMaximized;
+      final position = await windowManager.getPosition();
+      final size = await windowManager.getSize();
+      final isMaximized = await windowManager.isMaximized();
 
       await prefs.setDouble(_keyX, position.dx);
       await prefs.setDouble(_keyY, position.dy);
@@ -52,10 +52,8 @@ class WindowStateManager {
       final prefs = await SharedPreferences.getInstance();
 
       // Default values
-      const defaultWidth = 1024.0;
-      const defaultHeight = 576.0;
-      const minWidth = 800.0;
-      const minHeight = 400.0;
+      const defaultWidth = 800.0;
+      const defaultHeight = 550.0;
 
       // Get saved values
       final x = prefs.getDouble(_keyX);
@@ -67,36 +65,25 @@ class WindowStateManager {
       logger.i(
           'Restoring window state: ${width}x$height, maximized: $wasMaximized');
 
-      // Set minimum size
-      appWindow.minSize = const Size(minWidth, minHeight);
-
       // Restore size
-      appWindow.size = Size(width, height);
+      await windowManager.setSize(Size(width, height));
 
       // Restore position if saved
       if (x != null && y != null) {
-        appWindow.position = Offset(x, y);
+        await windowManager.setPosition(Offset(x, y));
       } else {
         // Center window if no saved position
-        appWindow.alignment = Alignment.center;
+        await windowManager.center();
       }
 
-      // Show window
-      appWindow.show();
-
-      // Restore maximized state with delay
+      // Restore maximized state
       if (wasMaximized) {
-        Future.delayed(const Duration(milliseconds: 100), () {
-          appWindow.maximize();
-        });
+        await windowManager.maximize();
       }
     } catch (e) {
       logger.e('Failed to restore window state: $e');
-      // Fallback to defaults
-      appWindow.minSize = const Size(800, 400);
-      appWindow.size = const Size(1024, 576);
-      appWindow.alignment = Alignment.center;
-      appWindow.show();
+      // Fallback to defaults - center the window
+      await windowManager.center();
     }
   }
 
