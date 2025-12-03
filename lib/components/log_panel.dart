@@ -393,6 +393,7 @@ class LogPanel extends StatelessWidget {
         color: colorScheme.surfaceContainerLowest,
         padding: const EdgeInsets.all(12),
         child: _LogContentView(
+          key: ValueKey(task.taskId),
           task: task,
           theme: theme,
           colorScheme: colorScheme,
@@ -409,6 +410,7 @@ class _LogContentView extends StatefulWidget {
   final ColorScheme colorScheme;
 
   const _LogContentView({
+    super.key,
     required this.task,
     required this.theme,
     required this.colorScheme,
