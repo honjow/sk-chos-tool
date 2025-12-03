@@ -1,16 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
-final buttonStyle = ElevatedButton.styleFrom(
-  padding: buttonPadding,
-  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(16.0),
-  ),
-);
+import 'package:sk_chos_tool/const.dart';
+import 'package:sk_chos_tool/utils/snackbar_helper.dart';
 
 class ActionButton extends StatefulWidget {
   const ActionButton({super.key, required this.title, this.onPressed});
@@ -27,7 +19,7 @@ class _ActionButtonState extends State<ActionButton> {
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
-      style: buttonStyle,
+      style: elevatedButtonStyle,
       onPressed: _isLoading
           ? null
           : () async {
@@ -35,52 +27,23 @@ class _ActionButtonState extends State<ActionButton> {
                 _isLoading = true;
               });
               try {
-                final backgroundColor = context
-                    .theme.colorScheme.primaryContainer
-                    .withValues(alpha: 0.9);
                 await widget.onPressed?.call();
-                Get.showSnackbar(
-                  GetSnackBar(
-                    title: '成功',
-                    message: '${widget.title} 处理成功',
-                    backgroundColor: backgroundColor,
-                    icon: const Icon(Icons.check, color: Colors.green),
-                    snackPosition: SnackPosition.BOTTOM,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 20,
-                    ),
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 20,
-                    ),
-                    duration: const Duration(seconds: 3),
-                  ),
+                SnackbarHelper.showSuccess(
+                  '成功',
+                  '${widget.title} 处理成功',
                 );
               } catch (e) {
-                Get.showSnackbar(
-                  GetSnackBar(
-                    title: '失败',
-                    message: '${widget.title} 处理失败',
-                    backgroundColor: Colors.red.withValues(alpha: 0.9),
-                    icon: const Icon(Icons.error, color: Colors.white),
-                    snackPosition: SnackPosition.BOTTOM,
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 20,
-                    ),
-                    margin: const EdgeInsets.symmetric(
-                      vertical: 10,
-                      horizontal: 20,
-                    ),
-                    duration: const Duration(seconds: 3),
-                  ),
+                SnackbarHelper.showError(
+                  '失败',
+                  '${widget.title} 处理失败',
                 );
                 rethrow;
               } finally {
-                setState(() {
-                  _isLoading = false;
-                });
+                if (mounted) {
+                  setState(() {
+                    _isLoading = false;
+                  });
+                }
               }
             },
       child: Row(

@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-
-const buttonPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
+import 'package:sk_chos_tool/const.dart';
+import 'package:sk_chos_tool/utils/snackbar_helper.dart';
 
 class InstallerItem extends StatefulWidget {
   const InstallerItem({
@@ -52,14 +51,6 @@ class _InstallerItemState extends State<InstallerItem> {
 
   @override
   Widget build(BuildContext context) {
-    final buttonStyle = ElevatedButton.styleFrom(
-      padding: buttonPadding,
-      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-    );
-
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
       child: Row(
@@ -99,62 +90,32 @@ class _InstallerItemState extends State<InstallerItem> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                style: buttonStyle,
+                style: elevatedButtonStyle,
                 onPressed: _isLoading
                     ? null
                     : () async {
                         setState(() {
                           _isLoading = true;
                         });
-                        final backgroundColor = context
-                            .theme.colorScheme.primaryContainer
-                            .withOpacity(0.9);
                         try {
                           await widget.onUninstall?.call();
                           await _checkValue();
-                          Get.showSnackbar(
-                            GetSnackBar(
-                              title: '卸载成功',
-                              message: '${widget.title} 卸载成功',
-                              backgroundColor: backgroundColor,
-                              icon:
-                                  const Icon(Icons.check, color: Colors.green),
-                              snackPosition: SnackPosition.BOTTOM,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              duration: const Duration(seconds: 3),
-                            ),
+                          SnackbarHelper.showSuccess(
+                            '卸载成功',
+                            '${widget.title} 卸载成功',
                           );
                         } catch (e) {
-                          Get.showSnackbar(
-                            GetSnackBar(
-                              title: '卸载失败',
-                              message: '${widget.title} 卸载失败 $e',
-                              backgroundColor: backgroundColor,
-                              icon: const Icon(Icons.error, color: Colors.red),
-                              snackPosition: SnackPosition.BOTTOM,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              duration: const Duration(seconds: 3),
-                            ),
+                          SnackbarHelper.showError(
+                            '卸载失败',
+                            '${widget.title} 卸载失败 $e',
                           );
                           rethrow;
                         } finally {
-                          setState(() {
-                            _isLoading = false;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
                         }
                       },
                 child: const Text('卸载'),
@@ -164,62 +125,32 @@ class _InstallerItemState extends State<InstallerItem> {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: ElevatedButton(
-                style: buttonStyle,
+                style: elevatedButtonStyle,
                 onPressed: _isLoading
                     ? null
                     : () async {
                         setState(() {
                           _isLoading = true;
                         });
-                        final backgroundColor = context
-                            .theme.colorScheme.primaryContainer
-                            .withOpacity(0.9);
                         try {
                           await widget.onInstall?.call();
                           await _checkValue();
-                          Get.showSnackbar(
-                            GetSnackBar(
-                              title: '安装成功',
-                              message: '${widget.title} 安装成功',
-                              backgroundColor: backgroundColor,
-                              icon:
-                                  const Icon(Icons.check, color: Colors.green),
-                              snackPosition: SnackPosition.BOTTOM,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              duration: const Duration(seconds: 3),
-                            ),
+                          SnackbarHelper.showSuccess(
+                            '安装成功',
+                            '${widget.title} 安装成功',
                           );
                         } catch (e) {
-                          Get.showSnackbar(
-                            GetSnackBar(
-                              title: '安装失败',
-                              message: '${widget.title} 安装失败 $e',
-                              backgroundColor: backgroundColor,
-                              icon: const Icon(Icons.error, color: Colors.red),
-                              snackPosition: SnackPosition.BOTTOM,
-                              padding: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              margin: const EdgeInsets.symmetric(
-                                vertical: 10,
-                                horizontal: 20,
-                              ),
-                              duration: const Duration(seconds: 3),
-                            ),
+                          SnackbarHelper.showError(
+                            '安装失败',
+                            '${widget.title} 安装失败 $e',
                           );
                           rethrow;
                         } finally {
-                          setState(() {
-                            _isLoading = false;
-                          });
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
                         }
                       },
                 child: _installed ? const Text('重新安装') : const Text('安装'),

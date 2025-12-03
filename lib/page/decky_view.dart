@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:sk_chos_tool/components/installer_item.dart';
 import 'package:sk_chos_tool/components/scroll.dart';
@@ -10,7 +8,6 @@ class DeckyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final homePath = '${Platform.environment['HOME']}';
     return SkSingleChildScrollView(
       child: Column(
         children: [

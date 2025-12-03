@@ -96,6 +96,7 @@ Future<bool> chkHibernate() async {
     final content = await file.readAsString();
     return content.contains(checkContent);
   } catch (e) {
+    logger.w('Failed to check hibernate status: $e');
     return false;
   }
 }
@@ -110,7 +111,7 @@ Future<void> setHibernate(bool enable) async {
     }
     await run('sudo systemctl daemon-reload');
   } catch (e) {
-    // throw Exception('Failed to set hibernate');
+    logger.e('Failed to set hibernate: $e');
     rethrow;
   }
 }
@@ -119,6 +120,7 @@ Future<void> setFirmwareOverride(bool enable) async {
   try {
     await run('sudo sk-firmware-override ${enable ? 'enable' : 'disable'}');
   } catch (e) {
+    logger.e('Failed to set firmware override: $e');
     rethrow;
   }
 }
@@ -131,6 +133,7 @@ Future<bool> chkFirmwareOverride() async {
     final content = await file.readAsString();
     return content.contains(checkContent);
   } catch (e) {
+    logger.w('Failed to check firmware override: $e');
     return false;
   }
 }
@@ -143,6 +146,7 @@ Future<bool> chkUsbWakeup() async {
     final content = await file.readAsString();
     return content.contains(checkContent);
   } catch (e) {
+    logger.w('Failed to check USB wakeup: $e');
     return false;
   }
 }
@@ -159,6 +163,7 @@ Future<void> setUsbWakeup(bool enable) async {
     }
     await run('sudo frzr-tweaks');
   } catch (e) {
+    logger.e('Failed to set USB wakeup: $e');
     rethrow;
   }
 }
@@ -464,6 +469,7 @@ Future<SleepMode> getSleepMode() async {
     }
     return SleepMode.suspend;
   } catch (e) {
+    logger.w('Failed to get sleep mode: $e');
     return SleepMode.suspend;
   }
 }
@@ -487,6 +493,7 @@ Future<void> setSleepMode(SleepMode mode) async {
     }
     await run('sudo systemctl daemon-reload');
   } catch (e) {
+    logger.e('Failed to set sleep mode: $e');
     rethrow;
   }
 }
@@ -509,6 +516,7 @@ Future<String> getHibernateDelay() async {
     }
     return '';
   } catch (e) {
+    logger.w('Failed to get hibernate delay: $e');
     return '';
   }
 }
