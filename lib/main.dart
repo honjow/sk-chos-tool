@@ -24,6 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
+      navigatorKey: Get.key,
       title: 'SkorionOS Tool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(

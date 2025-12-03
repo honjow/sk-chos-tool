@@ -43,9 +43,11 @@ class _InstallerItemState extends State<InstallerItem> {
   Future<void> _checkValue() async {
     if (widget.onCheck != null) {
       final value = await widget.onCheck!();
-      setState(() {
-        _installed = value;
-      });
+      if (mounted) {
+        setState(() {
+          _installed = value;
+        });
+      }
     }
   }
 
