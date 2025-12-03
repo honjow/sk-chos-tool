@@ -20,7 +20,7 @@ dependencies:
   ini_file: ^1.0.0
   shared_preferences: ^2.2.2
   window_manager: ^0.3.9
-  xterm: ^3.5.0
+  xterm: ^4.0.0
   # dio: ^5.4.2+1
   flutter_linkify: #^6.0.0
     git:
