@@ -35,40 +35,45 @@ class _ActionButtonState extends State<ActionButton> {
                 _isLoading = true;
               });
               try {
-                final backgroundColor =
-                    context.theme.colorScheme.primaryContainer.withOpacity(0.9);
+                final backgroundColor = context
+                    .theme.colorScheme.primaryContainer
+                    .withValues(alpha: 0.9);
                 await widget.onPressed?.call();
-                Get.snackbar(
-                  '成功',
-                  '${widget.title} 处理成功',
-                  backgroundColor: backgroundColor,
-                  icon: const Icon(Icons.check, color: Colors.green),
-                  barBlur: 100,
-                  snackPosition: SnackPosition.BOTTOM,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 20,
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 20,
+                Get.showSnackbar(
+                  GetSnackBar(
+                    title: '成功',
+                    message: '${widget.title} 处理成功',
+                    backgroundColor: backgroundColor,
+                    icon: const Icon(Icons.check, color: Colors.green),
+                    snackPosition: SnackPosition.BOTTOM,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
               } catch (e) {
-                Get.snackbar(
-                  '失败',
-                  '${widget.title} 处理失败',
-                  backgroundColor: Colors.red.withOpacity(0.9),
-                  icon: const Icon(Icons.error, color: Colors.white),
-                  barBlur: 100,
-                  snackPosition: SnackPosition.BOTTOM,
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 20,
-                  ),
-                  margin: const EdgeInsets.symmetric(
-                    vertical: 10,
-                    horizontal: 20,
+                Get.showSnackbar(
+                  GetSnackBar(
+                    title: '失败',
+                    message: '${widget.title} 处理失败',
+                    backgroundColor: Colors.red.withValues(alpha: 0.9),
+                    icon: const Icon(Icons.error, color: Colors.white),
+                    snackPosition: SnackPosition.BOTTOM,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    margin: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 20,
+                    ),
+                    duration: const Duration(seconds: 3),
                   ),
                 );
                 rethrow;

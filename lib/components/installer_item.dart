@@ -112,37 +112,42 @@ class _InstallerItemState extends State<InstallerItem> {
                         try {
                           await widget.onUninstall?.call();
                           await _checkValue();
-                          Get.snackbar(
-                            '卸载成功',
-                            '${widget.title} 卸载成功',
-                            backgroundColor: backgroundColor,
-                            icon: const Icon(Icons.check, color: Colors.green),
-                            barBlur: 100,
-                            snackPosition: SnackPosition.BOTTOM,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              title: '卸载成功',
+                              message: '${widget.title} 卸载成功',
+                              backgroundColor: backgroundColor,
+                              icon:
+                                  const Icon(Icons.check, color: Colors.green),
+                              snackPosition: SnackPosition.BOTTOM,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              duration: const Duration(seconds: 3),
                             ),
                           );
                         } catch (e) {
-                          Get.snackbar(
-                            '卸载失败',
-                            '${widget.title} 卸载失败 $e',
-                            backgroundColor: backgroundColor,
-                            icon: const Icon(Icons.error, color: Colors.red),
-                            barBlur: 100,
-                            snackPosition: SnackPosition.BOTTOM,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              title: '卸载失败',
+                              message: '${widget.title} 卸载失败 $e',
+                              backgroundColor: backgroundColor,
+                              icon: const Icon(Icons.error, color: Colors.red),
+                              snackPosition: SnackPosition.BOTTOM,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              duration: const Duration(seconds: 3),
                             ),
                           );
                           rethrow;
@@ -172,37 +177,42 @@ class _InstallerItemState extends State<InstallerItem> {
                         try {
                           await widget.onInstall?.call();
                           await _checkValue();
-                          Get.snackbar(
-                            '安装成功',
-                            '${widget.title} 安装成功',
-                            backgroundColor: backgroundColor,
-                            icon: const Icon(Icons.check, color: Colors.green),
-                            barBlur: 100,
-                            snackPosition: SnackPosition.BOTTOM,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              title: '安装成功',
+                              message: '${widget.title} 安装成功',
+                              backgroundColor: backgroundColor,
+                              icon:
+                                  const Icon(Icons.check, color: Colors.green),
+                              snackPosition: SnackPosition.BOTTOM,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              duration: const Duration(seconds: 3),
                             ),
                           );
                         } catch (e) {
-                          Get.snackbar(
-                            '安装失败',
-                            '${widget.title} 安装失败 $e',
-                            backgroundColor: backgroundColor,
-                            icon: const Icon(Icons.error, color: Colors.red),
-                            barBlur: 100,
-                            snackPosition: SnackPosition.BOTTOM,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
-                            ),
-                            margin: const EdgeInsets.symmetric(
-                              vertical: 10,
-                              horizontal: 20,
+                          Get.showSnackbar(
+                            GetSnackBar(
+                              title: '安装失败',
+                              message: '${widget.title} 安装失败 $e',
+                              backgroundColor: backgroundColor,
+                              icon: const Icon(Icons.error, color: Colors.red),
+                              snackPosition: SnackPosition.BOTTOM,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              margin: const EdgeInsets.symmetric(
+                                vertical: 10,
+                                horizontal: 20,
+                              ),
+                              duration: const Duration(seconds: 3),
                             ),
                           );
                           rethrow;
