@@ -1,17 +1,19 @@
 import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:window_manager/window_manager.dart';
 import 'package:sk_chos_tool/controller/main_controller.dart';
 import 'package:sk_chos_tool/page/main_view.dart';
 import 'package:sk_chos_tool/utils/window_state.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+
   Get.lazyPut(() => MainController(), fenix: true);
   runApp(const MyApp());
 
   doWhenWindowReady(() async {
-    // Restore window state (position, size, maximized)
     await WindowStateManager.restoreWindowState();
   });
 }
@@ -23,32 +25,52 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
+class _MyAppState extends State<MyApp> with WindowListener {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+    windowManager.addListener(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
+    windowManager.removeListener(this);
     super.dispose();
   }
 
+  // 窗口关闭前保存（最重要！）
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    // Save window state when app is paused or detached
-    if (state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
-      WindowStateManager.saveWindowState();
-    }
+  void onWindowClose() async {
+    await WindowStateManager.saveWindowState();
+  }
+
+  // 窗口调整大小时保存（防抖）
+  @override
+  void onWindowResize() {
+    WindowStateManager.scheduleSave();
+  }
+
+  // 窗口移动时保存（防抖）
+  @override
+  void onWindowMove() {
+    WindowStateManager.scheduleSave();
+  }
+
+  // 最大化时立即保存
+  @override
+  void onWindowMaximize() {
+    WindowStateManager.saveWindowState();
+  }
+
+  // 取消最大化时立即保存
+  @override
+  void onWindowUnmaximize() {
+    WindowStateManager.saveWindowState();
   }
 
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      // navigatorKey: Get.key,
       title: 'SkorionOS Tool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -63,11 +85,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         useMaterial3: true,
       ),
       home: const MainPage(title: 'SkorionOS Tool'),
-      // builder: (context, child) {
-      //   return Overlay(
-      //     initialEntries: [OverlayEntry(builder: (_) => child!)],
-      //   );
-      // },
     );
   }
 }
