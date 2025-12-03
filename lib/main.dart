@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      navigatorKey: Get.key,
+      // navigatorKey: Get.key,
       title: 'SkorionOS Tool',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
@@ -39,6 +39,11 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const MainPage(title: 'SkorionOS Tool'),
+      // builder: (context, child) {
+      //   return Overlay(
+      //     initialEntries: [OverlayEntry(builder: (_) => child!)],
+      //   );
+      // },
     );
   }
 }
