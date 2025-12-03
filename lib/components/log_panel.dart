@@ -172,7 +172,7 @@ class LogPanel extends StatelessWidget {
                   height: 4,
                   margin: const EdgeInsets.only(top: 6, bottom: 4),
                   decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -285,7 +285,8 @@ class LogPanel extends StatelessWidget {
                         borderRadius: BorderRadius.circular(20),
                         border: isActive
                             ? Border.all(
-                                color: colorScheme.primary.withOpacity(0.5),
+                                color:
+                                    colorScheme.primary.withValues(alpha: 0.5),
                                 width: 1.5,
                               )
                             : null,
@@ -321,35 +322,26 @@ class LogPanel extends StatelessWidget {
                           Text(
                             task.taskName,
                             style: theme.textTheme.bodyMedium?.copyWith(
-                              // 使用 bodyMedium
                               color: isActive
                                   ? colorScheme.onPrimaryContainer
                                   : colorScheme.onSurface,
                               fontWeight: isActive
                                   ? FontWeight.w500
                                   : FontWeight.normal,
+                              height: 1.0, // 去除文字上下额外空间
                             ),
                           ),
                           const SizedBox(width: 8),
-                          // 关闭按钮 - 垂直居中
-                          Center(
-                            // 添加Center确保居中
-                            child: Material(
-                              color: Colors.transparent,
-                              child: InkWell(
-                                onTap: () => controller.removeTask(task.taskId),
-                                borderRadius: BorderRadius.circular(12),
-                                child: Padding(
-                                  padding: const EdgeInsets.all(4),
-                                  child: Icon(
-                                    Icons.close_rounded,
-                                    color: isActive
-                                        ? colorScheme.onPrimaryContainer
-                                        : colorScheme.onSurfaceVariant,
-                                    size: 18,
-                                  ),
-                                ),
-                              ),
+                          // 关闭按钮 - 简洁版
+                          InkWell(
+                            onTap: () => controller.removeTask(task.taskId),
+                            borderRadius: BorderRadius.circular(9),
+                            child: Icon(
+                              Icons.close_rounded,
+                              color: isActive
+                                  ? colorScheme.onPrimaryContainer
+                                  : colorScheme.onSurfaceVariant,
+                              size: 18,
                             ),
                           ),
                         ],
@@ -417,6 +409,7 @@ class _LogContentView extends StatefulWidget {
 class _LogContentViewState extends State<_LogContentView> {
   final ScrollController _scrollController = ScrollController();
   bool _autoScroll = true; // 是否启用自动滚动
+  bool _isProgrammaticScroll = false; // 是否是程序触发的滚动
 
   @override
   void initState() {
@@ -433,9 +426,11 @@ class _LogContentViewState extends State<_LogContentView> {
   void _onScroll() {
     // 如果用户手动向上滚动，禁用自动滚动
     if (_scrollController.hasClients) {
-      // 用户滚动也标记为交互
-      final controller = Get.find<LogController>();
-      controller.userInteracted.value = true;
+      // 只有非程序触发的滚动才标记为用户交互
+      if (!_isProgrammaticScroll) {
+        final controller = Get.find<LogController>();
+        controller.userInteracted.value = true;
+      }
 
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
@@ -450,11 +445,16 @@ class _LogContentViewState extends State<_LogContentView> {
     if (_autoScroll && _scrollController.hasClients) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
-          _scrollController.animateTo(
+          _isProgrammaticScroll = true; // 标记为程序滚动
+          _scrollController
+              .animateTo(
             _scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
-          );
+          )
+              .then((_) {
+            _isProgrammaticScroll = false; // 滚动完成，恢复标志
+          });
         }
       });
     }
