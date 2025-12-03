@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:xterm/xterm.dart';
 import 'package:sk_chos_tool/controller/log_controller.dart';
 
 /// Log panel component that displays task execution logs
@@ -390,7 +391,7 @@ class LogPanel extends StatelessWidget {
   }
 }
 
-/// Log content widget with auto-scroll
+/// Log content widget with xterm terminal emulation
 class _LogContentView extends StatefulWidget {
   final TaskLog task;
   final ThemeData theme;
@@ -407,54 +408,51 @@ class _LogContentView extends StatefulWidget {
 }
 
 class _LogContentViewState extends State<_LogContentView> {
+  late final Terminal _terminal;
   final ScrollController _scrollController = ScrollController();
-  bool _autoScroll = true; // 是否启用自动滚动
-  bool _isProgrammaticScroll = false; // 是否是程序触发的滚动
+  int _lastLogCount = 0;
+  bool _autoScroll = true;
 
   @override
   void initState() {
     super.initState();
+    _terminal = Terminal(maxLines: 1000);
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
   }
 
   void _onScroll() {
-    // 如果用户手动向上滚动，禁用自动滚动
+    // Check if user manually scrolled up
     if (_scrollController.hasClients) {
-      // 只有非程序触发的滚动才标记为用户交互
-      if (!_isProgrammaticScroll) {
-        final controller = Get.find<LogController>();
-        controller.userInteracted.value = true;
-      }
-
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
-      // 距离底部 100 像素内认为是在底部
-      setState(() {
-        _autoScroll = (maxScroll - currentScroll) < 100;
-      });
+
+      // If scrolling up (not at bottom), mark as user interaction
+      if ((maxScroll - currentScroll) > 100) {
+        final controller = Get.find<LogController>();
+        controller.userInteracted.value = true;
+        setState(() {
+          _autoScroll = false;
+        });
+      } else {
+        setState(() {
+          _autoScroll = true;
+        });
+      }
     }
   }
 
   void _scrollToBottom() {
-    if (_autoScroll && _scrollController.hasClients) {
+    if (_scrollController.hasClients && _autoScroll) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
-          _isProgrammaticScroll = true; // 标记为程序滚动
-          _scrollController
-              .animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeOut,
-          )
-              .then((_) {
-            _isProgrammaticScroll = false; // 滚动完成，恢复标志
-          });
+          _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
         }
       });
     }
@@ -476,32 +474,60 @@ class _LogContentViewState extends State<_LogContentView> {
         );
       }
 
-      // 有新日志时自动滚动
-      _scrollToBottom();
+      // Write only new log lines (avoid duplicates)
+      if (logs.length > _lastLogCount) {
+        for (var i = _lastLogCount; i < logs.length; i++) {
+          _terminal.write('${logs[i]}\r\n');
+        }
+        _lastLogCount = logs.length;
+
+        // Auto-scroll to bottom
+        _scrollToBottom();
+      }
 
       return Stack(
         children: [
-          ListView.builder(
-            controller: _scrollController,
-            itemCount: logs.length,
-            itemBuilder: (context, index) {
-              final line = logs[index];
-              final isError = line.startsWith('[ERROR]');
-
-              return SelectableText(
-                line,
-                style: TextStyle(
-                  fontFamily: 'monospace',
-                  fontSize: 13,
-                  color: isError
-                      ? widget.colorScheme.error
-                      : widget.colorScheme.onSurfaceVariant,
-                  height: 1.5,
-                ),
-              );
-            },
+          TerminalView(
+            _terminal,
+            scrollController: _scrollController,
+            theme: TerminalTheme(
+              cursor: widget.colorScheme.primary,
+              selection: widget.colorScheme.primaryContainer,
+              foreground: widget.colorScheme.onSurfaceVariant,
+              background: widget.colorScheme.surfaceContainerLowest,
+              black: widget.colorScheme.onSurface,
+              red: Colors.red[400]!,
+              green: Colors.green[400]!,
+              yellow: Colors.yellow[400]!,
+              blue: Colors.blue[400]!,
+              magenta: Colors.purple[400]!,
+              cyan: Colors.cyan[400]!,
+              white: widget.colorScheme.onSurface,
+              brightBlack: Colors.grey[600]!,
+              brightRed: Colors.red[300]!,
+              brightGreen: Colors.green[300]!,
+              brightYellow: Colors.yellow[300]!,
+              brightBlue: Colors.blue[300]!,
+              brightMagenta: Colors.purple[300]!,
+              brightCyan: Colors.cyan[300]!,
+              brightWhite: widget.colorScheme.onSurface,
+              searchHitBackground:
+                  widget.colorScheme.secondary.withValues(alpha: 0.3),
+              searchHitBackgroundCurrent:
+                  widget.colorScheme.secondary.withValues(alpha: 0.5),
+              searchHitForeground: widget.colorScheme.onSecondary,
+            ),
+            textStyle: const TerminalStyle(
+              fontFamily: 'monospace',
+              fontSize: 13,
+            ),
+            padding: EdgeInsets.zero,
+            autofocus: false,
+            backgroundOpacity: 1.0,
+            readOnly: true,
+            hardwareKeyboardOnly: true,
           ),
-          // 如果不在底部，显示"跳到底部"按钮
+          // Show "scroll to bottom" button when not at bottom
           if (!_autoScroll)
             Positioned(
               bottom: 16,
