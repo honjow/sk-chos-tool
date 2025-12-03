@@ -50,13 +50,13 @@ Future<void> runWithLog({
       },
     );
 
-    // Capture stderr
+    // Capture stderr - 直接输出，不添加前缀
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
         .listen(
       (line) {
-        task.addLog('[ERROR] $line');
+        task.addLog(line);
       },
     );
 
@@ -64,7 +64,7 @@ Future<void> runWithLog({
     final exitCode = await process.exitCode;
 
     if (exitCode != 0) {
-      task.addLog('Process exited with code $exitCode');
+      task.addLog('[ERROR] Process exited with code $exitCode');
       logController.completeTask(task.taskId, hasError: true);
       throw Exception('Command failed with exit code $exitCode: $command');
     }
@@ -72,7 +72,7 @@ Future<void> runWithLog({
     task.addLog('✓ Completed successfully');
     logController.completeTask(task.taskId);
   } catch (e) {
-    task.addLog('✗ Error: $e');
+    task.addLog('[ERROR] $e');
     logController.completeTask(task.taskId, hasError: true);
     rethrow;
   }
