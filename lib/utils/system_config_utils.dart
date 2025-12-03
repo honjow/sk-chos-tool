@@ -1,11 +1,11 @@
 import 'dart:io';
 
-import 'package:process_run/process_run.dart';
 import 'package:sk_chos_tool/page/general_view.dart';
 import 'package:sk_chos_tool/utils/const.dart';
 import 'package:sk_chos_tool/utils/enum.dart';
 import 'package:sk_chos_tool/utils/file_utils.dart';
 import 'package:sk_chos_tool/utils/log.dart';
+import 'package:sk_chos_tool/utils/process_utils.dart';
 
 /// System configuration utilities for hibernate, sleep, firmware, USB, etc.
 
@@ -29,12 +29,21 @@ Future<bool> chkHibernate() async {
 Future<void> setHibernate(bool enable) async {
   try {
     if (enable) {
-      await run(
-          'sudo cp /lib/systemd/system/systemd-hibernate.service /etc/systemd/system/systemd-suspend.service');
+      await runWithLog(
+        command:
+            'sudo cp /lib/systemd/system/systemd-hibernate.service /etc/systemd/system/systemd-suspend.service',
+        taskName: 'Enable Hibernate',
+      );
     } else {
-      await run('sudo rm /etc/systemd/system/systemd-suspend.service');
+      await runWithLog(
+        command: 'sudo rm /etc/systemd/system/systemd-suspend.service',
+        taskName: 'Disable Hibernate',
+      );
     }
-    await run('sudo systemctl daemon-reload');
+    await runWithLog(
+      command: 'sudo systemctl daemon-reload',
+      taskName: 'Reload Systemd',
+    );
   } catch (e) {
     logger.e('Failed to set hibernate: $e');
     rethrow;
@@ -74,18 +83,30 @@ Future<void> setSleepMode(SleepMode mode) async {
     const filePath = suspendServicePath;
     switch (mode) {
       case SleepMode.suspend:
-        await run('sudo rm $filePath');
+        await runWithLog(
+          command: 'sudo rm $filePath',
+          taskName: 'Set Sleep Mode: Suspend',
+        );
         break;
       case SleepMode.hibernate:
-        await run(
-            'sudo cp /lib/systemd/system/systemd-hibernate.service $filePath');
+        await runWithLog(
+          command:
+              'sudo cp /lib/systemd/system/systemd-hibernate.service $filePath',
+          taskName: 'Set Sleep Mode: Hibernate',
+        );
         break;
       case SleepMode.suspendThenHibernate:
-        await run(
-            'sudo cp /lib/systemd/system/systemd-suspend-then-hibernate.service $filePath');
+        await runWithLog(
+          command:
+              'sudo cp /lib/systemd/system/systemd-suspend-then-hibernate.service $filePath',
+          taskName: 'Set Sleep Mode: Suspend Then Hibernate',
+        );
         break;
     }
-    await run('sudo systemctl daemon-reload');
+    await runWithLog(
+      command: 'sudo systemctl daemon-reload',
+      taskName: 'Reload Systemd',
+    );
   } catch (e) {
     logger.e('Failed to set sleep mode: $e');
     rethrow;
@@ -136,15 +157,25 @@ Future<void> setHibernateDelay(String delay) async {
     const filePath = hiberatehDelayPath;
     final file = File(filePath);
     if (!await file.exists()) {
-      await run('sudo mkdir -p /etc/systemd/sleep.conf.d');
-      await run('sudo touch $filePath');
+      await runWithLog(
+        command: 'sudo mkdir -p /etc/systemd/sleep.conf.d',
+        taskName: 'Create Hibernate Config Dir',
+      );
+      await runWithLog(
+        command: 'sudo touch $filePath',
+        taskName: 'Create Hibernate Config File',
+      );
     }
-    await run(
-      '''
+    await runWithLog(
+      command: '''
       bash -c "echo -e '[Sleep]\\nHibernateDelaySec=$delay' | sudo tee $filePath"
       ''',
+      taskName: 'Set Hibernate Delay: $delay',
     );
-    await run('sudo systemctl kill -s HUP systemd-logind');
+    await runWithLog(
+      command: 'sudo systemctl kill -s HUP systemd-logind',
+      taskName: 'Reload Systemd Logind',
+    );
   } catch (e) {
     logger.e('Failed to set hibernate delay $e');
     rethrow;
@@ -170,7 +201,11 @@ Future<bool> chkFirmwareOverride() async {
 /// Set firmware override
 Future<void> setFirmwareOverride(bool enable) async {
   try {
-    await run('sudo sk-firmware-override ${enable ? 'enable' : 'disable'}');
+    await runWithLog(
+      command: 'sudo sk-firmware-override ${enable ? 'enable' : 'disable'}',
+      taskName:
+          enable ? 'Enable Firmware Override' : 'Disable Firmware Override',
+    );
   } catch (e) {
     logger.e('Failed to set firmware override: $e');
     rethrow;
@@ -200,11 +235,20 @@ Future<void> setUsbWakeup(bool enable) async {
   const disableStr = 'USB_WAKE_ENABLED=0';
   try {
     if (enable) {
-      await run('sudo sed -i "s/^$disableStr/$enableStr/g" $filePath');
+      await runWithLog(
+        command: 'sudo sed -i "s/^$disableStr/$enableStr/g" $filePath',
+        taskName: 'Enable USB Wakeup',
+      );
     } else {
-      await run('sudo sed -i "s/^$enableStr/$disableStr/g" $filePath');
+      await runWithLog(
+        command: 'sudo sed -i "s/^$enableStr/$disableStr/g" $filePath',
+        taskName: 'Disable USB Wakeup',
+      );
     }
-    await run('sudo frzr-tweaks');
+    await runWithLog(
+      command: 'sudo frzr-tweaks',
+      taskName: 'Apply Device Quirks',
+    );
   } catch (e) {
     logger.e('Failed to set USB wakeup: $e');
     rethrow;
@@ -215,41 +259,62 @@ Future<void> setUsbWakeup(bool enable) async {
 
 /// Create/repair swapfile
 Future<void> makeSwapfile() async {
-  await run('sudo ${AppPaths.scriptsPath}/make_swapfile.sh');
+  await runWithLog(
+    command: 'sudo ${AppPaths.scriptsPath}/make_swapfile.sh',
+    taskName: 'Make Swapfile',
+  );
 }
 
 /// Clear system cache
 Future<void> clearCache() async {
-  await run('''sudo rm -f /var/lib/pacman/db.lck
+  await runWithLog(
+    command: '''sudo rm -f /var/lib/pacman/db.lck
       rm -rf ~/.cache/sk-holoiso-config/*
       rm -rf ~/.local/share/pnpm/store/*
       yay -Scc --noconfirm
-      ''');
+      ''',
+    taskName: 'Clear System Cache',
+  );
 }
 
 /// Repair boot
 Future<void> bootRepair() async {
-  await run('sudo /usr/bin/sk-chos-boot-fix');
+  await runWithLog(
+    command: 'sudo /usr/bin/sk-chos-boot-fix',
+    taskName: 'Boot Repair',
+  );
 }
 
 /// Repair /etc configuration
 Future<void> etcRepair() async {
-  await run('sudo ${AppPaths.scriptsPath}/etc_repair.sh');
+  await runWithLog(
+    command: 'sudo ${AppPaths.scriptsPath}/etc_repair.sh',
+    taskName: 'Repair /etc',
+  );
 }
 
 /// Repair /etc configuration (full)
 Future<void> etcRepairFull() async {
-  await run('sudo ${AppPaths.scriptsPath}/etc_repair.sh full');
+  await runWithLog(
+    command: 'sudo ${AppPaths.scriptsPath}/etc_repair.sh full',
+    taskName: 'Repair /etc (Full)',
+  );
 }
 
 /// Re-run first run script
 Future<void> reFirstRun() async {
-  await run('/usr/bin/sk-first-run');
+  await runWithLog(
+    command: '/usr/bin/sk-first-run',
+    taskName: 'First Run Setup',
+  );
 }
 
 /// Reset GNOME settings
 Future<void> resetGnome() async {
-  await run('bash -c "sudo dconf update && dconf reset -f /"');
+  await runWithLog(
+    command: 'bash -c "sudo dconf update && dconf reset -f /"',
+    taskName: 'Reset GNOME Settings',
+  );
 }
 
 // ==================== Device Detection ====================

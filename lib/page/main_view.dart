@@ -2,7 +2,9 @@ import 'package:bitsdojo_window/bitsdojo_window.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:sk_chos_tool/components/log_panel.dart';
 import 'package:sk_chos_tool/components/scroll.dart';
+import 'package:sk_chos_tool/controller/log_controller.dart';
 import 'package:sk_chos_tool/controller/main_controller.dart';
 import 'package:sk_chos_tool/page/about_view.dart';
 import 'package:sk_chos_tool/page/advance_view.dart';
@@ -24,6 +26,9 @@ class MainPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Initialize LogController
+    Get.put(LogController());
+
     return Scaffold(
       body: Row(
         children: [
@@ -126,6 +131,7 @@ class MainPage extends StatelessWidget {
                     ],
                   ),
                 ),
+                const LogPanel(),
               ],
             ),
           ),

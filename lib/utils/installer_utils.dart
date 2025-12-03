@@ -1,5 +1,6 @@
 import 'package:process_run/process_run.dart';
 import 'package:sk_chos_tool/utils/const.dart';
+import 'package:sk_chos_tool/utils/process_utils.dart';
 
 /// Application installer utilities
 
@@ -55,7 +56,7 @@ Future<String> getCdnParam() async {
 Future<void> installEmuDeck() async {
   final param = await getCdnParam();
   final command = 'bash $SK_TOOL_SCRIPTS_PATH/emudeck_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'EmuDeck');
 }
 
 /// Install Anime Games Launcher (Mihoyo all-in-one)
@@ -63,7 +64,7 @@ Future<void> installAnimeGamesLauncher() async {
   final param = await getCdnParam();
   final command =
       'bash $SK_TOOL_SCRIPTS_PATH/anime-games-launcher_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'Anime Games Launcher');
 }
 
 /// Install An Anime Game Launcher (Genshin Impact)
@@ -71,7 +72,7 @@ Future<void> installAnAnimeGameLauncher() async {
   final param = await getCdnParam();
   final command =
       'bash $SK_TOOL_SCRIPTS_PATH/an-anime-game-launcher_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'An Anime Game Launcher');
 }
 
 /// Install The Honkers Railway Launcher (Honkai: Star Rail)
@@ -79,7 +80,7 @@ Future<void> installTheHonkersRailwayLauncher() async {
   final param = await getCdnParam();
   final command =
       'bash $SK_TOOL_SCRIPTS_PATH/the-honkers-railway-launcher_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'The Honkers Railway Launcher');
 }
 
 /// Install Sleepy Launcher (Zenless Zone Zero)
@@ -87,7 +88,7 @@ Future<void> installSleepyLauncher() async {
   final param = await getCdnParam();
   final command =
       'bash $SK_TOOL_SCRIPTS_PATH/sleepy-launcher_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'Sleepy Launcher');
 }
 
 /// Install Honkers Launcher (Honkai Impact 3)
@@ -95,19 +96,25 @@ Future<void> installHonkersLauncher() async {
   final param = await getCdnParam();
   final command =
       'bash $SK_TOOL_SCRIPTS_PATH/honkers-launcher_install.sh $param';
-  await run(command);
+  await runWithLog(command: command, taskName: 'Honkers Launcher');
 }
 
 // ==================== Other Installers ====================
 
 /// Install Nix package manager
 Future<void> installNix() async {
-  await run('/usr/bin/sk-nix-install install');
+  await runWithLog(
+    command: '/usr/bin/sk-nix-install install',
+    taskName: 'Nix Package Manager',
+  );
 }
 
 /// Uninstall Nix package manager
 Future<void> uninstallNix() async {
-  await run('/usr/bin/sk-nix-install uninstall');
+  await runWithLog(
+    command: '/usr/bin/sk-nix-install uninstall',
+    taskName: 'Uninstall Nix',
+  );
 }
 
 /// Check if Nix is installed
@@ -123,10 +130,16 @@ Future<bool> chkNix() async {
 
 /// Install/update sk-chos-tool itself
 Future<void> installSkChosTool() async {
-  await run('/usr/bin/__sk-chos-tool-update');
+  await runWithLog(
+    command: '/usr/bin/__sk-chos-tool-update',
+    taskName: 'SkorionOS Tool',
+  );
 }
 
 /// Uninstall AppImage application
 Future<void> uninstallAppImage(String appName) async {
-  await run('bash $SK_TOOL_SCRIPTS_PATH/appimage_uninstall.sh $appName');
+  await runWithLog(
+    command: 'bash $SK_TOOL_SCRIPTS_PATH/appimage_uninstall.sh $appName',
+    taskName: 'Uninstall $appName',
+  );
 }
