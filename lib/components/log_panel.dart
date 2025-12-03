@@ -31,24 +31,28 @@ class LogPanel extends StatelessWidget {
         height: controller.isExpanded.value
             ? controller.panelHeight.value
             : LogController.collapsedHeight,
-        child: Container(
-          decoration: BoxDecoration(
-            border: Border(
-              top: controller.isExpanded.value
-                  ? BorderSide.none
-                  : BorderSide(color: colorScheme.outlineVariant),
-            ),
-            color: colorScheme.surface,
-            borderRadius: controller.isExpanded.value
-                ? const BorderRadius.only(
-                    topLeft: Radius.circular(16),
-                    topRight: Radius.circular(16),
-                  )
-                : null,
-          ),
-          child: controller.isExpanded.value
-              ? _buildExpanded(controller, theme, colorScheme)
-              : _buildCollapsed(controller, theme, colorScheme),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return Container(
+              decoration: BoxDecoration(
+                border: Border(
+                  top: controller.isExpanded.value
+                      ? BorderSide.none
+                      : BorderSide(color: colorScheme.outlineVariant),
+                ),
+                color: colorScheme.surface,
+                borderRadius: controller.isExpanded.value
+                    ? const BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      )
+                    : null,
+              ),
+              child: constraints.maxHeight > 100
+                  ? _buildExpanded(controller, theme, colorScheme)
+                  : _buildCollapsed(controller, theme, colorScheme),
+            );
+          },
         ),
       );
     });
@@ -130,23 +134,24 @@ class LogPanel extends StatelessWidget {
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return Column(
-      children: [
-        _buildHeader(controller, theme, colorScheme),
-        _buildTabs(controller, theme, colorScheme),
-        Expanded(child: _buildLogContent(controller, theme, colorScheme)),
-      ],
+    return ClipRect(
+      child: Column(
+        children: [
+          _buildHeader(controller, theme, colorScheme),
+          _buildTabs(controller, theme, colorScheme),
+          Expanded(child: _buildLogContent(controller, theme, colorScheme)),
+        ],
+      ),
     );
   }
 
-  /// Build header with integrated drag handle - 整合版
+  /// Build header with integrated drag handle
   Widget _buildHeader(
     LogController controller,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
     return GestureDetector(
-      // 整个Header都可拖动调整大小
       onVerticalDragStart: (_) => controller.startDrag(),
       onVerticalDragUpdate: (details) {
         controller.updateHeight(details.delta.dy);
@@ -164,22 +169,28 @@ class LogPanel extends StatelessWidget {
               topRight: Radius.circular(16),
             ),
           ),
-          child: Column(
+          child: Stack(
             children: [
-              // 拖动指示器在顶部
-              Center(
-                child: Container(
-                  width: 48,
-                  height: 4,
-                  margin: const EdgeInsets.only(top: 6, bottom: 4),
-                  decoration: BoxDecoration(
-                    color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(2),
+              // 拖动指示器 - 浮在顶部中央
+              Positioned(
+                top: 6,
+                left: 0,
+                right: 0,
+                child: Center(
+                  child: Container(
+                    width: 48,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color:
+                          colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
                   ),
                 ),
               ),
-              // Header内容
-              Expanded(
+              // Header内容 - 垂直居中
+              Align(
+                alignment: Alignment.center,
                 child: Row(
                   children: [
                     Icon(
