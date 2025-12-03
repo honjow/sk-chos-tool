@@ -28,6 +28,7 @@ class LogController extends GetxController {
   final currentTaskId = ''.obs;
   final isExpanded = false.obs;
   final panelHeight = 250.0.obs; // 添加可调节高度
+  final isDragging = false.obs; // 拖动状态
 
   // 高度限制
   static const double minHeight = 100.0;
@@ -83,5 +84,15 @@ class LogController extends GetxController {
   void updateHeight(double delta) {
     final newHeight = panelHeight.value - delta; // 减去delta因为是向上拖动
     panelHeight.value = newHeight.clamp(minHeight, maxHeight);
+  }
+
+  /// Start dragging
+  void startDrag() {
+    isDragging.value = true;
+  }
+
+  /// End dragging
+  void endDrag() {
+    isDragging.value = false;
   }
 }

@@ -23,75 +23,34 @@ class LogPanel extends StatelessWidget {
       }
 
       return AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
+        duration: controller.isDragging.value
+            ? Duration.zero // 拖动时无动画，跟手
+            : const Duration(milliseconds: 300), // 展开/收起时有动画
         curve: Curves.easeInOut,
         height: controller.isExpanded.value
             ? controller.panelHeight.value
             : LogController.collapsedHeight,
-        child: Column(
-          children: [
-            // 可拖动的分隔条 - 触屏优化
-            if (controller.isExpanded.value)
-              _buildDragHandle(controller, colorScheme),
-            // 面板内容
-            Expanded(
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    top: controller.isExpanded.value
-                        ? BorderSide.none
-                        : BorderSide(color: colorScheme.outlineVariant),
-                  ),
-                  color: colorScheme.surface,
-                  borderRadius: controller.isExpanded.value
-                      ? const BorderRadius.only(
-                          topLeft: Radius.circular(16),
-                          topRight: Radius.circular(16),
-                        )
-                      : null,
-                ),
-                child: controller.isExpanded.value
-                    ? _buildExpanded(controller, theme, colorScheme)
-                    : _buildCollapsed(controller, theme, colorScheme),
-              ),
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border(
+              top: controller.isExpanded.value
+                  ? BorderSide.none
+                  : BorderSide(color: colorScheme.outlineVariant),
             ),
-          ],
+            color: colorScheme.surface,
+            borderRadius: controller.isExpanded.value
+                ? const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
+                  )
+                : null,
+          ),
+          child: controller.isExpanded.value
+              ? _buildExpanded(controller, theme, colorScheme)
+              : _buildCollapsed(controller, theme, colorScheme),
         ),
       );
     });
-  }
-
-  /// Build draggable handle for resizing - 触屏优化版本
-  Widget _buildDragHandle(LogController controller, ColorScheme colorScheme) {
-    return GestureDetector(
-      onVerticalDragUpdate: (details) {
-        controller.updateHeight(details.delta.dy);
-      },
-      child: MouseRegion(
-        cursor: SystemMouseCursors.resizeUpDown,
-        child: Container(
-          height: 16, // 增加到 16px，更容易触摸
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: const BorderRadius.only(
-              topLeft: Radius.circular(16),
-              topRight: Radius.circular(16),
-            ),
-          ),
-          child: Center(
-            child: Container(
-              width: 48, // 增加宽度，更明显
-              height: 5, // 增加高度
-              margin: const EdgeInsets.only(top: 5),
-              decoration: BoxDecoration(
-                color: colorScheme.onSurfaceVariant.withOpacity(0.5), // 提高透明度
-                borderRadius: BorderRadius.circular(2.5),
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 
   /// Build collapsed view - 触屏优化
@@ -179,79 +138,113 @@ class LogPanel extends StatelessWidget {
     );
   }
 
-  /// Build header with title and controls - 触屏优化
+  /// Build header with integrated drag handle - 整合版
   Widget _buildHeader(
     LogController controller,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return Container(
-      height: 48, // 增加到 48，符合触屏标准
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.terminal_rounded,
-            color: colorScheme.primary,
-            size: 18, // 略微增大
-          ),
-          const SizedBox(width: 8),
-          Text(
-            '任务日志',
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: colorScheme.onSurface,
-              fontWeight: FontWeight.w500,
+    return GestureDetector(
+      // 整个Header都可拖动调整大小
+      onVerticalDragStart: (_) => controller.startDrag(),
+      onVerticalDragUpdate: (details) {
+        controller.updateHeight(details.delta.dy);
+      },
+      onVerticalDragEnd: (_) => controller.endDrag(),
+      child: MouseRegion(
+        cursor: SystemMouseCursors.resizeUpDown,
+        child: Container(
+          height: 48,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          decoration: BoxDecoration(
+            color: colorScheme.surfaceContainerHighest,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(16),
+              topRight: Radius.circular(16),
             ),
           ),
-          const SizedBox(width: 12),
-          Obx(() {
-            final runningCount =
-                controller.tasks.where((t) => t.isRunning.value).length;
-            if (runningCount > 0) {
-              return Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 12, vertical: 6), // 增大 padding
-                decoration: BoxDecoration(
-                  color: colorScheme.primaryContainer,
-                  borderRadius: BorderRadius.circular(14), // 更圆润
-                ),
-                child: Text(
-                  '$runningCount 运行中',
-                  style: theme.textTheme.labelMedium?.copyWith(
-                    // 使用 labelMedium
-                    color: colorScheme.onPrimaryContainer,
-                    fontWeight: FontWeight.w500,
+          child: Column(
+            children: [
+              // 拖动指示器在顶部
+              Center(
+                child: Container(
+                  width: 48,
+                  height: 4,
+                  margin: const EdgeInsets.only(top: 6, bottom: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                    borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-              );
-            }
-            return const SizedBox.shrink();
-          }),
-          const Spacer(),
-          // 增加按钮点击区域
-          IconButton(
-            icon: Icon(Icons.clear_all_rounded,
-                color: colorScheme.onSurfaceVariant),
-            iconSize: 22, // 增大图标
-            tooltip: '清空所有',
-            padding: const EdgeInsets.all(12), // 增加点击区域
-            constraints:
-                const BoxConstraints(minWidth: 48, minHeight: 48), // 最小触摸区域
-            onPressed: () => controller.clearAll(),
+              ),
+              // Header内容
+              Expanded(
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.terminal_rounded,
+                      color: colorScheme.primary,
+                      size: 18,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '任务日志',
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        color: colorScheme.onSurface,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Obx(() {
+                      final runningCount = controller.tasks
+                          .where((t) => t.isRunning.value)
+                          .length;
+                      if (runningCount > 0) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: colorScheme.primaryContainer,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$runningCount 运行中',
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: colorScheme.onPrimaryContainer,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                    const Spacer(),
+                    IconButton(
+                      icon: Icon(Icons.clear_all_rounded,
+                          color: colorScheme.onSurfaceVariant),
+                      iconSize: 20,
+                      tooltip: '清空所有',
+                      padding: const EdgeInsets.all(8),
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
+                      onPressed: () => controller.clearAll(),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.expand_more_rounded,
+                          color: colorScheme.onSurface),
+                      iconSize: 22,
+                      tooltip: '收起',
+                      padding: const EdgeInsets.all(8),
+                      constraints:
+                          const BoxConstraints(minWidth: 40, minHeight: 40),
+                      onPressed: () => controller.isExpanded.value = false,
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.expand_more_rounded, color: colorScheme.onSurface),
-            iconSize: 24, // 增大图标
-            tooltip: '收起',
-            padding: const EdgeInsets.all(12), // 增加点击区域
-            constraints:
-                const BoxConstraints(minWidth: 48, minHeight: 48), // 最小触摸区域
-            onPressed: () => controller.isExpanded.value = false,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -391,38 +384,133 @@ class LogPanel extends StatelessWidget {
       return Container(
         color: colorScheme.surfaceContainerLowest,
         padding: const EdgeInsets.all(12),
-        child: Obx(() {
-          if (task.logs.isEmpty) {
-            return Center(
-              child: Text(
-                '等待输出...',
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurfaceVariant,
-                ),
-              ),
-            );
-          }
+        child: _LogContentView(
+          task: task,
+          theme: theme,
+          colorScheme: colorScheme,
+        ),
+      );
+    });
+  }
+}
 
-          return ListView.builder(
-            itemCount: task.logs.length,
+/// Log content widget with auto-scroll
+class _LogContentView extends StatefulWidget {
+  final TaskLog task;
+  final ThemeData theme;
+  final ColorScheme colorScheme;
+
+  const _LogContentView({
+    required this.task,
+    required this.theme,
+    required this.colorScheme,
+  });
+
+  @override
+  State<_LogContentView> createState() => _LogContentViewState();
+}
+
+class _LogContentViewState extends State<_LogContentView> {
+  final ScrollController _scrollController = ScrollController();
+  bool _autoScroll = true; // 是否启用自动滚动
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    // 如果用户手动向上滚动，禁用自动滚动
+    if (_scrollController.hasClients) {
+      final maxScroll = _scrollController.position.maxScrollExtent;
+      final currentScroll = _scrollController.position.pixels;
+      // 距离底部 100 像素内认为是在底部
+      setState(() {
+        _autoScroll = (maxScroll - currentScroll) < 100;
+      });
+    }
+  }
+
+  void _scrollToBottom() {
+    if (_autoScroll && _scrollController.hasClients) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_scrollController.hasClients) {
+          _scrollController.animateTo(
+            _scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 200),
+            curve: Curves.easeOut,
+          );
+        }
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Obx(() {
+      final logs = widget.task.logs;
+
+      if (logs.isEmpty) {
+        return Center(
+          child: Text(
+            '等待输出...',
+            style: widget.theme.textTheme.bodyMedium?.copyWith(
+              color: widget.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        );
+      }
+
+      // 有新日志时自动滚动
+      _scrollToBottom();
+
+      return Stack(
+        children: [
+          ListView.builder(
+            controller: _scrollController,
+            itemCount: logs.length,
             itemBuilder: (context, index) {
-              final line = task.logs[index];
+              final line = logs[index];
               final isError = line.startsWith('[ERROR]');
 
               return SelectableText(
                 line,
                 style: TextStyle(
                   fontFamily: 'monospace',
-                  fontSize: 13, // 略微增大字体，触屏更易读
+                  fontSize: 13,
                   color: isError
-                      ? colorScheme.error
-                      : colorScheme.onSurfaceVariant,
-                  height: 1.5, // 增加行高，更易读
+                      ? widget.colorScheme.error
+                      : widget.colorScheme.onSurfaceVariant,
+                  height: 1.5,
                 ),
               );
             },
-          );
-        }),
+          ),
+          // 如果不在底部，显示"跳到底部"按钮
+          if (!_autoScroll)
+            Positioned(
+              bottom: 16,
+              right: 16,
+              child: FloatingActionButton.small(
+                onPressed: () {
+                  setState(() => _autoScroll = true);
+                  _scrollToBottom();
+                },
+                backgroundColor: widget.colorScheme.primaryContainer,
+                child: Icon(
+                  Icons.arrow_downward_rounded,
+                  color: widget.colorScheme.onPrimaryContainer,
+                ),
+              ),
+            ),
+        ],
       );
     });
   }
