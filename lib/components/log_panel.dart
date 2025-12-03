@@ -48,9 +48,18 @@ class LogPanel extends StatelessWidget {
                       )
                     : null,
               ),
-              child: constraints.maxHeight > 100
-                  ? _buildExpanded(controller, theme, colorScheme)
-                  : _buildCollapsed(controller, theme, colorScheme),
+              child: Stack(
+                children: [
+                  // 展开内容 - 始终存在，只控制可见性
+                  Offstage(
+                    offstage: constraints.maxHeight <= 100,
+                    child: _buildExpanded(controller, theme, colorScheme),
+                  ),
+                  // 收起内容
+                  if (constraints.maxHeight <= 100)
+                    _buildCollapsed(controller, theme, colorScheme),
+                ],
+              ),
             );
           },
         ),
@@ -367,39 +376,66 @@ class LogPanel extends StatelessWidget {
     );
   }
 
-  /// Build log content area
+  /// Build log content area with PageView
   Widget _buildLogContent(
     LogController controller,
     ThemeData theme,
     ColorScheme colorScheme,
   ) {
-    return Obx(() {
-      final task = controller.tasks.firstWhereOrNull(
-        (t) => t.taskId == controller.currentTaskId.value,
-      );
-
-      if (task == null) {
-        return Center(
-          child: Text(
-            '无日志',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurfaceVariant,
+    return Container(
+      color: colorScheme.surfaceContainerLowest,
+      padding: const EdgeInsets.all(12),
+      child: Obx(() {
+        if (controller.tasks.isEmpty) {
+          return Center(
+            child: Text(
+              '无日志',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
             ),
-          ),
-        );
-      }
+          );
+        }
 
-      return Container(
-        color: colorScheme.surfaceContainerLowest,
-        padding: const EdgeInsets.all(12),
-        child: _LogContentView(
-          key: ValueKey(task.taskId),
-          task: task,
-          theme: theme,
-          colorScheme: colorScheme,
-        ),
-      );
-    });
+        // 确保 pageController 指向正确的页面
+        final currentIndex = controller.tasks.indexWhere(
+          (t) => t.taskId == controller.currentTaskId.value,
+        );
+        if (currentIndex >= 0 &&
+            controller.pageController.hasClients &&
+            controller.pageController.page?.round() != currentIndex) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (controller.pageController.hasClients) {
+              controller.pageController.jumpToPage(currentIndex);
+            }
+          });
+        }
+
+        return PageView.builder(
+          controller: controller.pageController,
+          physics: const NeverScrollableScrollPhysics(), // 禁用手势滑动
+          itemCount: controller.tasks.length,
+          onPageChanged: (index) {
+            // 页面切换时同步 currentTaskId
+            if (index < controller.tasks.length) {
+              controller.currentTaskId.value = controller.tasks[index].taskId;
+            }
+          },
+          itemBuilder: (context, index) {
+            if (index >= controller.tasks.length) {
+              return const SizedBox.shrink();
+            }
+            final task = controller.tasks[index];
+            return _LogContentView(
+              key: ValueKey(task.taskId), // 关键：绑定到特定任务
+              task: task,
+              theme: theme,
+              colorScheme: colorScheme,
+            );
+          },
+        );
+      }),
+    );
   }
 }
 
@@ -420,21 +456,38 @@ class _LogContentView extends StatefulWidget {
   State<_LogContentView> createState() => _LogContentViewState();
 }
 
-class _LogContentViewState extends State<_LogContentView> {
+class _LogContentViewState extends State<_LogContentView>
+    with AutomaticKeepAliveClientMixin {
   late final Terminal _terminal;
   final ScrollController _scrollController = ScrollController();
   int _lastLogCount = 0;
   bool _autoScroll = true;
 
   @override
+  bool get wantKeepAlive => true;
+
+  @override
   void initState() {
     super.initState();
     _terminal = Terminal(maxLines: 1000);
     _scrollController.addListener(_onScroll);
+    _autoScroll = widget.task.isRunning.value;
+
+    // 加载所有已有日志
+    if (widget.task.logs.isNotEmpty) {
+      for (var log in widget.task.logs) {
+        _terminal.write('$log\r\n');
+      }
+      _lastLogCount = widget.task.logs.length;
+    }
   }
 
   @override
   void dispose() {
+    // 保存滚动位置
+    if (_scrollController.hasClients) {
+      widget.task.scrollPosition = _scrollController.position.pixels;
+    }
     _scrollController.removeListener(_onScroll);
     _scrollController.dispose();
     super.dispose();
@@ -446,14 +499,18 @@ class _LogContentViewState extends State<_LogContentView> {
       final maxScroll = _scrollController.position.maxScrollExtent;
       final currentScroll = _scrollController.position.pixels;
 
-      // If scrolling up (not at bottom), mark as user interaction
+      // 实时保存滚动位置
+      widget.task.scrollPosition = currentScroll;
+
+      // If scrolling up (not at bottom), disable auto-scroll
       if ((maxScroll - currentScroll) > 100) {
         final controller = Get.find<LogController>();
         controller.userInteracted.value = true;
         setState(() {
           _autoScroll = false;
         });
-      } else {
+      } else if (widget.task.isRunning.value) {
+        // 只在任务运行中且滚动到底部时才恢复自动滚动
         setState(() {
           _autoScroll = true;
         });
@@ -462,7 +519,10 @@ class _LogContentViewState extends State<_LogContentView> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients && _autoScroll) {
+    // 只在任务运行中且开启自动滚动时才滚动
+    if (_scrollController.hasClients &&
+        _autoScroll &&
+        widget.task.isRunning.value) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (_scrollController.hasClients) {
           _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
@@ -473,6 +533,7 @@ class _LogContentViewState extends State<_LogContentView> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Obx(() {
       final logs = widget.task.logs;
 
@@ -487,15 +548,17 @@ class _LogContentViewState extends State<_LogContentView> {
         );
       }
 
-      // Write only new log lines (avoid duplicates)
+      // 处理新增的日志
       if (logs.length > _lastLogCount) {
         for (var i = _lastLogCount; i < logs.length; i++) {
           _terminal.write('${logs[i]}\r\n');
         }
         _lastLogCount = logs.length;
 
-        // Auto-scroll to bottom
-        _scrollToBottom();
+        // 运行中任务且自动滚动开启时，滚动到底部
+        if (widget.task.isRunning.value && _autoScroll) {
+          _scrollToBottom();
+        }
       }
 
       return Stack(

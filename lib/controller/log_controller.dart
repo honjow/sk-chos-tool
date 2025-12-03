@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 /// Single task log information
@@ -7,6 +8,7 @@ class TaskLog {
   final RxList<String> logs = <String>[].obs;
   final RxBool isRunning = true.obs;
   final RxBool hasError = false.obs;
+  double scrollPosition = 0.0; // 保存滚动位置
 
   TaskLog({
     required this.taskId,
@@ -30,11 +32,43 @@ class LogController extends GetxController {
   final panelHeight = 250.0.obs; // 添加可调节高度
   final isDragging = false.obs; // 拖动状态
   final userInteracted = false.obs; // 用户交互标记
+  late PageController pageController;
 
   // 高度限制
   static const double minHeight = 100.0;
   static const double maxHeight = 600.0;
   static const double collapsedHeight = 40.0;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initPageController();
+
+    // 监听展开状态，展开时同步页面
+    ever(isExpanded, (expanded) {
+      if (expanded && pageController.hasClients) {
+        final index = tasks.indexWhere((t) => t.taskId == currentTaskId.value);
+        if (index >= 0 && pageController.page?.round() != index) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (pageController.hasClients) {
+              pageController.jumpToPage(index);
+            }
+          });
+        }
+      }
+    });
+  }
+
+  void _initPageController() {
+    final index = tasks.indexWhere((t) => t.taskId == currentTaskId.value);
+    pageController = PageController(initialPage: index >= 0 ? index : 0);
+  }
+
+  @override
+  void onClose() {
+    pageController.dispose();
+    super.onClose();
+  }
 
   /// Start a new task and return the task object
   TaskLog startTask(String taskName) {
@@ -46,6 +80,14 @@ class LogController extends GetxController {
     currentTaskId.value = task.taskId;
     isExpanded.value = true; // Auto expand
     userInteracted.value = false; // 重置用户交互标记
+
+    // 跳转到新任务页面
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (pageController.hasClients) {
+        pageController.jumpToPage(tasks.length - 1);
+      }
+    });
+
     return task;
   }
 
@@ -70,11 +112,24 @@ class LogController extends GetxController {
   /// Remove a task from the list
   void removeTask(String taskId) {
     userInteracted.value = true; // 标记用户交互
-    tasks.removeWhere((t) => t.taskId == taskId);
+    final index = tasks.indexWhere((t) => t.taskId == taskId);
+    if (index < 0) return;
+
+    final wasCurrentTask = currentTaskId.value == taskId;
+    tasks.removeAt(index);
+
     if (tasks.isEmpty) {
       isExpanded.value = false;
-    } else if (currentTaskId.value == taskId && tasks.isNotEmpty) {
-      currentTaskId.value = tasks.first.taskId;
+    } else if (wasCurrentTask) {
+      // 如果删除的是当前任务，切换到邻近任务
+      final newIndex = index >= tasks.length ? tasks.length - 1 : index;
+      currentTaskId.value = tasks[newIndex].taskId;
+      // 等待PageView更新后再跳转
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (pageController.hasClients && tasks.isNotEmpty) {
+          pageController.jumpToPage(newIndex);
+        }
+      });
     }
   }
 
@@ -88,7 +143,13 @@ class LogController extends GetxController {
   /// Switch to a task (called when clicking tab)
   void switchToTask(String taskId) {
     userInteracted.value = true; // 切换tab算用户交互
-    currentTaskId.value = taskId;
+    final index = tasks.indexWhere((t) => t.taskId == taskId);
+    if (index >= 0) {
+      currentTaskId.value = taskId;
+      if (pageController.hasClients) {
+        pageController.jumpToPage(index);
+      }
+    }
   }
 
   /// Update panel height (called during drag)
