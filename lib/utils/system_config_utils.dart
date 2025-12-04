@@ -260,7 +260,7 @@ Future<void> setUsbWakeup(bool enable) async {
 /// Create/repair swapfile
 Future<void> makeSwapfile() async {
   await runWithLog(
-    command: 'sudo ${AppPaths.scriptsPath}/make_swapfile.sh',
+    command: 'sudo ${AppPaths.scriptsPath}/make_swapfile.sh -1',
     taskName: 'Make Swapfile',
   );
 }
