@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:process_run/process_run.dart';
 import 'package:sk_chos_tool/utils/process_utils.dart';
+import 'package:sk_chos_tool/utils/system_config_utils.dart';
 
 /// Systemctl service management utilities
 
@@ -89,8 +90,12 @@ Future<void> toggleHandheldService(String serviceName, bool enable) async {
     await toggleService(service, valEnable);
 
     // steam-powerbuttond follows inputplumber
-    if (service == 'inputplumber.service') {
-      await toggleService('steam-powerbuttond.service', valEnable);
+    // if (service == 'inputplumber.service') {
+    //   await toggleService('steam-powerbuttond.service', valEnable);
+    // }
+
+    if (service.contains('inputplumber')) {
+      await setHandlePowerKeyIgnore(valEnable);
     }
   }
 }

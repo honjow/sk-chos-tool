@@ -13,7 +13,7 @@ import 'package:sk_chos_tool/utils/process_utils.dart';
 
 /// Check if hibernate is enabled
 Future<bool> chkHibernate() async {
-  const filePath = 'etc/systemd/system/systemd-suspend.service';
+  const filePath = '/etc/systemd/system/systemd-suspend.service';
   const checkContent = 'systemd-sleep hibernate';
   try {
     final file = File(filePath);
@@ -22,6 +22,34 @@ Future<bool> chkHibernate() async {
   } catch (e) {
     logger.w('Failed to check hibernate status: $e');
     return false;
+  }
+}
+
+/// Set HandlePowerKey=ignore
+Future<void> setHandlePowerKeyIgnore(bool enable) async {
+  logger.i('setHandlePowerKeyIgnore $enable');
+  try {
+    const filePath =
+        '/etc/systemd/logind.conf.d/zzz-handle-power-key-ignore.conf';
+    final file = File(filePath);
+    if (enable) {
+      if (!await file.exists()) {
+        await file.create(recursive: true);
+      }
+      await file.writeAsString('[Login]\nHandlePowerKey=ignore\n');
+    } else {
+      if (await file.exists()) {
+        await file.delete();
+      }
+    }
+    await runWithLog(
+      command:
+          'sudo systemctl daemon-reload && sudo systemctl kill -s HUP systemd-logind',
+      taskName: 'Reload Systemd Logind',
+    );
+  } catch (e) {
+    logger.e('Failed to set HandlePowerKey ignore: $e');
+    rethrow;
   }
 }
 
@@ -43,6 +71,10 @@ Future<void> setHibernate(bool enable) async {
     await runWithLog(
       command: 'sudo systemctl daemon-reload',
       taskName: 'Reload Systemd',
+    );
+    await runWithLog(
+      command: 'sudo systemctl kill -s HUP systemd-logind',
+      taskName: 'Reload Systemd Logind',
     );
   } catch (e) {
     logger.e('Failed to set hibernate: $e');
