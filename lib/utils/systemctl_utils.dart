@@ -67,9 +67,14 @@ Future<void> toggleServiceMask(String serviceName, bool mask) async {
   await runWithLog(command: command, taskName: taskName);
 }
 
+Future<void> toggleHandheldServiceSimple(
+    String serviceName, bool enable) async {
+  await toggleService(serviceName, enable);
+}
+
 /// Toggle handheld device service (handycon, hhd, inputplumber)
 /// Only one can be enabled at a time
-Future<void> toggleHandheldService(String serviceName, bool enable) async {
+Future<void> toggleHandheldServiceFull(String serviceName, bool enable) async {
   final allService = [
     'handycon.service',
     'hhd@${Platform.environment['USER']}.service',
@@ -97,5 +102,15 @@ Future<void> toggleHandheldService(String serviceName, bool enable) async {
     if (service.contains('inputplumber')) {
       await setHandlePowerKeyIgnore(valEnable);
     }
+  }
+}
+
+Future<void> toggleHandheldService(String serviceName, bool enable) async {
+  final hhdConflictManagePath = "/usr/bin/hhd-conflict-manage";
+  // check if hhd-conflict-manage is installed
+  if (!await File(hhdConflictManagePath).exists()) {
+    await toggleHandheldServiceSimple(serviceName, enable);
+  } else {
+    await toggleHandheldServiceFull(serviceName, enable);
   }
 }
