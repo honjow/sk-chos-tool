@@ -49,51 +49,51 @@ class GeneralView extends StatelessWidget {
     return SkSingleChildScrollView(
       child: Column(
         children: [
-          if (isHandyconInatalled)
-            SwitchItem(
-              title: 'HandyGCCS',
-              controller: handyconController,
-              description: '用来驱动部分掌机的手柄按钮',
-              onChanged: (bool value) async {
-                await toggleHandheldService('handycon.service', value);
-                if (value) {
-                  if (isHHDInatalled) {
-                    hhdController.reCheck?.call();
-                  }
-                  if (isInputplumberInatalled) {
-                    inputplumberController.reCheck?.call();
-                  }
-                }
-              },
-              onCheck: () async => checkServiceEnabled('handycon.service'),
-            ),
-          if (isInputplumberInatalled)
-            SwitchItem(
-              title: 'InputPlumber',
-              controller: inputplumberController,
-              description: 'HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动',
-              onChanged: (bool value) async {
-                await toggleHandheldService('inputplumber.service', value);
-                if (value) {
-                  if (isHHDInatalled) {
-                    hhdController.reCheck?.call();
-                  }
-                  if (isHandyconInatalled) {
-                    handyconController.reCheck?.call();
-                  }
-                }
-              },
-              onCheck: () async => checkServiceEnabled('inputplumber.service'),
-            ),
+          // if (isHandyconInatalled)
+          //   SwitchItem(
+          //     title: 'HandyGCCS',
+          //     controller: handyconController,
+          //     description: '用来驱动部分掌机的手柄按钮',
+          //     onChanged: (bool value) async {
+          //       await toggleHandheldService('handycon.service', value);
+          //       if (value) {
+          //         if (isHHDInatalled) {
+          //           hhdController.reCheck?.call();
+          //         }
+          //         if (isInputplumberInatalled) {
+          //           inputplumberController.reCheck?.call();
+          //         }
+          //       }
+          //     },
+          //     onCheck: () async => checkServiceEnabled('handycon.service'),
+          //   ),
+          // if (isInputplumberInatalled)
+          //   SwitchItem(
+          //     title: 'InputPlumber',
+          //     controller: inputplumberController,
+          //     description: 'HandyGCCS 的替代品, 奇美拉官方出品. 控制器驱动',
+          //     onChanged: (bool value) async {
+          //       await toggleHandheldService('inputplumber.service', value);
+          //       if (value) {
+          //         if (isHHDInatalled) {
+          //           hhdController.reCheck?.call();
+          //         }
+          //         if (isHandyconInatalled) {
+          //           handyconController.reCheck?.call();
+          //         }
+          //       }
+          //     },
+          //     onCheck: () async => checkServiceEnabled('inputplumber.service'),
+          //   ),
           if (isHHDInatalled)
             SwitchItem(
               title: 'HHD',
               controller: hhdController,
               description:
-                  'Handheld Daemon, 另一个手柄驱动程序, 通过模拟 PS5 手柄支持陀螺仪和背键能等功能. 不能和 HandyGCCS 同时使用. 请配合HHD Decky插件使用.',
+                  'Handheld Daemon, 另一个手柄驱动程序。开启后会替代默认的 InputPlumber 使用，请配合HHD UI 进行详细设置.',
               onChanged: (bool value) async {
-                await toggleHandheldService(
-                    'hhd@${Platform.environment['USER']}.service', !value);
+                // await toggleHandheldService(
+                //     'hhd@${Platform.environment['USER']}.service', !value);
                 await toggleHandheldService('hhd.service', value);
                 if (value) {
                   if (isHandyconInatalled) {
@@ -109,7 +109,8 @@ class GeneralView extends StatelessWidget {
               },
               onCheck: () async {
                 return await checkServiceEnabled(
-                  'hhd@${Platform.environment['USER']}.service') || await checkServiceEnabled('hhd.service');
+                        'hhd@${Platform.environment['USER']}.service') ||
+                    await checkServiceEnabled('hhd.service');
               },
             ),
           SwitchItem(
