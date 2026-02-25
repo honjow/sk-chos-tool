@@ -48,3 +48,6 @@ appimage-build
 *.AppImage.zsync
 AppDir
 .vscode/
+
+# FVM Version Cache
+.fvm/

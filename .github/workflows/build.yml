@@ -23,10 +23,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v5
 
+      - name: Get Flutter version from FVM config
+        id: fvm
+        run: echo "flutter-version=$(cat .fvmrc | jq -r '.flutter')" >> $GITHUB_OUTPUT
+
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
+          flutter-version: ${{ steps.fvm.outputs.flutter-version }}
+          cache: true
 
       - name: Flutter Pub Get
         run: |
