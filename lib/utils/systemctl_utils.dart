@@ -51,21 +51,21 @@ Future<void> toggleService(String serviceName, bool enable) async {
 }
 
 /// Toggle service mask/unmask state
-Future<void> toggleServiceMask(String serviceName, bool mask) async {
-  final currentStatus = await getServiceEnableStatus(serviceName);
-  late final String command;
-  late final String taskName;
-  if (mask && currentStatus != 'masked') {
-    command = 'sudo systemctl mask $serviceName';
-    taskName = 'Mask $serviceName';
-  } else if (!mask && currentStatus == 'masked') {
-    command = 'sudo systemctl unmask $serviceName';
-    taskName = 'Unmask $serviceName';
-  } else {
-    return;
-  }
-  await runWithLog(command: command, taskName: taskName);
-}
+// Future<void> toggleServiceMask(String serviceName, bool mask) async {
+//   final currentStatus = await getServiceEnableStatus(serviceName);
+//   late final String command;
+//   late final String taskName;
+//   if (mask && currentStatus != 'masked') {
+//     command = 'sudo systemctl mask $serviceName';
+//     taskName = 'Mask $serviceName';
+//   } else if (!mask && currentStatus == 'masked') {
+//     command = 'sudo systemctl unmask $serviceName';
+//     taskName = 'Unmask $serviceName';
+//   } else {
+//     return;
+//   }
+//   await runWithLog(command: command, taskName: taskName);
+// }
 
 Future<void> toggleHandheldServiceSimple(
     String serviceName, bool enable) async {
@@ -74,43 +74,45 @@ Future<void> toggleHandheldServiceSimple(
 
 /// Toggle handheld device service (handycon, hhd, inputplumber)
 /// Only one can be enabled at a time
-Future<void> toggleHandheldServiceFull(String serviceName, bool enable) async {
-  final allService = [
-    'handycon.service',
-    'hhd@${Platform.environment['USER']}.service',
-    'hhd.service',
-    'inputplumber.service',
-  ];
-  for (final service in allService) {
-    late bool valMask;
-    late bool valEnable;
-    if (enable) {
-      valMask = service != serviceName;
-      valEnable = service == serviceName;
-    } else {
-      valMask = true;
-      valEnable = false;
-    }
-    await toggleServiceMask(service, valMask);
-    await toggleService(service, valEnable);
+// Future<void> toggleHandheldServiceFull(String serviceName, bool enable) async {
+//   final allService = [
+//     'handycon.service',
+//     'hhd@${Platform.environment['USER']}.service',
+//     'hhd.service',
+//     'inputplumber.service',
+//   ];
+//   for (final service in allService) {
+//     late bool valMask;
+//     late bool valEnable;
+//     if (enable) {
+//       valMask = service != serviceName;
+//       valEnable = service == serviceName;
+//     } else {
+//       valMask = true;
+//       valEnable = false;
+//     }
+//     await toggleServiceMask(service, valMask);
+//     await toggleService(service, valEnable);
 
-    // steam-powerbuttond follows inputplumber
-    // if (service == 'inputplumber.service') {
-    //   await toggleService('steam-powerbuttond.service', valEnable);
-    // }
+//     // steam-powerbuttond follows inputplumber
+//     // if (service == 'inputplumber.service') {
+//     //   await toggleService('steam-powerbuttond.service', valEnable);
+//     // }
 
-    if (service.contains('inputplumber')) {
-      await setHandlePowerKeyIgnore(valEnable);
-    }
-  }
-}
+//     if (service.contains('inputplumber')) {
+//       await setHandlePowerKeyIgnore(valEnable);
+//     }
+//   }
+// }
 
 Future<void> toggleHandheldService(String serviceName, bool enable) async {
-  final hhdConflictManagePath = "/usr/bin/hhd-conflict-manage";
-  // check if hhd-conflict-manage is installed
-  if (!await File(hhdConflictManagePath).exists()) {
-    await toggleHandheldServiceSimple(serviceName, enable);
-  } else {
-    await toggleHandheldServiceFull(serviceName, enable);
-  }
+  // final hhdConflictManagePath = "/usr/bin/hhd-conflict-manage";
+  // // check if hhd-conflict-manage is installed
+  // if (!await File(hhdConflictManagePath).exists()) {
+  //   await toggleHandheldServiceSimple(serviceName, enable);
+  // } else {
+  //   await toggleHandheldServiceFull(serviceName, enable);
+  // }
+
+  await toggleHandheldServiceSimple(serviceName, enable);
 }
